@@ -22,7 +22,7 @@ export default function Schedule() {
   const [filterCollapsed, setFilterCollapsed] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ScheduleEntryWithDetails | null>(null);
 
-  const { data: sessionsData } = useQuery({
+  const { data: sessionsData } = useQuery<{ sessions: Array<{ id: string; name: string }>; current: string }>({
     queryKey: ["/api/sessions"],
   });
 
@@ -53,7 +53,7 @@ export default function Schedule() {
   // Filter entries by current session
   const entries = allEntries.filter(entry => entry.session === sessionsData?.current || entry.session === "Fall 2025");
 
-  const { data: lunchBreak } = useQuery({
+  const { data: lunchBreak } = useQuery<{ startTime: string; endTime: string; enabled: boolean } | undefined>({
     queryKey: ["/api/lunch-break"],
   });
 
