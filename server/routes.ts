@@ -205,8 +205,12 @@ export async function registerRoutes(
 
   app.post("/api/schedule", async (req, res) => {
     try {
+      const currentSession = await storage.getCurrentSession();
       const data = insertScheduleEntrySchema.parse(req.body);
-      const entry = await storage.createScheduleEntry(data);
+      const entry = await storage.createScheduleEntry({
+        ...data,
+        session: data.session || currentSession,
+      });
       res.status(201).json(entry);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -801,6 +805,7 @@ export async function registerRoutes(
                     labGroup: null,
                     hasConflict: false,
                     conflictType: null,
+                    session: currentSession,
                   });
                   teacherSlots.get(teacher.id)?.add(sk);
                   roomSlots.get(availableRoom.id)?.add(sk);
