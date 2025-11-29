@@ -467,10 +467,17 @@ export async function registerRoutes(
         return minDay;
       };
 
+      // Track which courses have been scheduled to prevent scheduling same course twice
+      const scheduledCourses = new Set<string>();
+      
       // PHASE 1: Schedule ALL theory classes first - prioritize EARLY time slots
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
-        const batchCourses = courses.filter(c => c.semester === batch.semester && c.courseType === "theory");
+        const batchCourses = courses.filter(c => 
+          c.semester === batch.semester && 
+          c.courseType === "theory" && 
+          !scheduledCourses.has(c.id)
+        );
         
         for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
           const course = batchCourses[courseIdx];
@@ -562,6 +569,7 @@ export async function registerRoutes(
               semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 1);
 
               scheduledCount++;
+              scheduledCourses.add(course.id);
             }
           }
         }
@@ -570,7 +578,11 @@ export async function registerRoutes(
       // PHASE 2: Schedule lab classes - on different days from theory when possible
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
-        const batchCourses = courses.filter(c => c.semester === batch.semester && c.courseType === "lab");
+        const batchCourses = courses.filter(c => 
+          c.semester === batch.semester && 
+          c.courseType === "lab" && 
+          !scheduledCourses.has(c.id)
+        );
         
         for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
           const course = batchCourses[courseIdx];
