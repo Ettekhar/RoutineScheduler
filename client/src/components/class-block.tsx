@@ -15,6 +15,17 @@ interface ClassBlockProps {
   compact?: boolean;
 }
 
+const SEMESTER_COLORS = [
+  "bg-blue-500",
+  "bg-purple-500",
+  "bg-green-500",
+  "bg-pink-500",
+  "bg-cyan-500",
+  "bg-amber-500",
+  "bg-rose-500",
+  "bg-indigo-500",
+];
+
 export function ClassBlock({ 
   entry, 
   onClick, 
@@ -24,6 +35,7 @@ export function ClassBlock({
 }: ClassBlockProps) {
   const isTheory = entry.course.courseType === "theory";
   const hasConflict = entry.hasConflict;
+  const semesterColor = SEMESTER_COLORS[(entry.batch.semester - 1) % SEMESTER_COLORS.length];
 
   const getConflictMessage = () => {
     switch (entry.conflictType) {
@@ -41,7 +53,7 @@ export function ClassBlock({
   const blockContent = (
     <div
       className={cn(
-        "p-2.5 rounded-lg cursor-pointer transition-all",
+        "p-2.5 rounded-lg cursor-pointer transition-all relative",
         "border text-white shadow-sm hover:shadow-md",
         "hover-elevate active-elevate-2",
         "flex flex-col justify-between",
@@ -56,6 +68,11 @@ export function ClassBlock({
       onDragStart={onDragStart}
       data-testid={`class-block-${entry.id}`}
     >
+      {/* Semester indicator dot */}
+      <div className={cn("absolute top-1.5 left-1.5 w-2.5 h-2.5 rounded-full shadow-md", semesterColor)} 
+        title={`Semester ${entry.batch.semester}`}
+      />
+
       {/* Conflict indicator */}
       {hasConflict && (
         <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-schedule-conflict flex items-center justify-center shadow-md border border-white">
@@ -65,7 +82,7 @@ export function ClassBlock({
 
       {/* Course code */}
       <div className={cn(
-        "font-bold truncate leading-tight",
+        "font-bold truncate leading-tight pl-1",
         compact ? "text-xs" : "text-sm"
       )}>
         {entry.course.code}
