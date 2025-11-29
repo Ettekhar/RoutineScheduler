@@ -38,7 +38,6 @@ const isLunchTime = (startTime: string, endTime: string, lunch?: { startTime: st
   const lunchStart = timeToMinutes(lunch.startTime);
   const lunchEnd = timeToMinutes(lunch.endTime);
   
-  // Check if slot overlaps with lunch period
   return slotStart < lunchEnd && slotEnd > lunchStart;
 };
 
@@ -68,6 +67,9 @@ export function ScheduleCalendar({
 }: ScheduleCalendarProps) {
   const [dragOverCell, setDragOverCell] = useState<string | null>(null);
 
+  // Check if "all semester" filter is active
+  const isAllSemesterView = !filters.semester;
+
   // Filter entries based on active filters
   const filteredEntries = useMemo(() => {
     return entries.filter((entry) => {
@@ -81,7 +83,22 @@ export function ScheduleCalendar({
     });
   }, [entries, filters]);
 
-  // Group entries by day and time slot
+  // Group entries by day and semester (for all semester view)
+  const entriesByDayAndSemester = useMemo(() => {
+    const grouped: Record<string, ScheduleEntryWithDetails[]> = {};
+    
+    filteredEntries.forEach((entry) => {
+      const key = `${entry.day}-sem-${entry.batch.semester}`;
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+      grouped[key].push(entry);
+    });
+    
+    return grouped;
+  }, [filteredEntries]);
+
+  // Group entries by day and time slot (for regular view)
   const entriesByDayAndSlot = useMemo(() => {
     const grouped: Record<string, ScheduleEntryWithDetails[]> = {};
     
@@ -94,23 +111,6 @@ export function ScheduleCalendar({
     });
     
     return grouped;
-  }, [filteredEntries]);
-
-  // Get unique semesters for each day
-  const semestersByDay = useMemo(() => {
-    const semesters: Record<WorkingDay, Set<number>> = {
-      sunday: new Set(),
-      monday: new Set(),
-      tuesday: new Set(),
-      wednesday: new Set(),
-      thursday: new Set(),
-    };
-    
-    filteredEntries.forEach((entry) => {
-      semesters[entry.day as WorkingDay].add(entry.batch.semester);
-    });
-    
-    return semesters;
   }, [filteredEntries]);
 
   const handleDragStart = (e: React.DragEvent, entryId: string) => {
@@ -150,6 +150,140 @@ export function ScheduleCalendar({
     );
   }
 
+  // Render semester-wise view (all semester filter)
+  if (isAllSemesterView) {
+    return (
+      <div className="flex flex-col h-full" data-testid="schedule-calendar">
+        {/* Header with stats */}
+        <div className="flex items-center justify-between px-4 py-3 border-b bg-card">
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-semibold">Weekly Schedule (By Semester)</h2>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm bg-schedule-theory" />
+                Theory
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm bg-schedule-lab" />
+                Lab
+              </span>
+              {conflictCount > 0 && (
+                <span className="flex items-center gap-1.5 text-schedule-conflict">
+                  <AlertTriangle className="w-4 h-4" />
+                  {conflictCount} Conflict{conflictCount > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {filteredEntries.length} Classes Scheduled
+          </div>
+        </div>
+
+        {/* Semester Grid */}
+        <ScrollArea className="flex-1">
+          <div className="min-w-max">
+            {/* Semester Header */}
+            <div className="flex sticky top-0 z-20 bg-card border-b">
+              <div className="w-20 shrink-0 p-3 border-r font-medium text-sm text-muted-foreground">
+                Day
+              </div>
+              {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => (
+                <div
+                  key={sem}
+                  className="w-32 shrink-0 p-3 border-r text-center font-medium text-sm text-muted-foreground"
+                >
+                  S{sem}
+                </div>
+              ))}
+            </div>
+
+            {/* Day Rows */}
+            {WORKING_DAYS.map((day) => (
+              <div key={day} className="flex border-b">
+                {/* Day Label */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="w-20 shrink-0 p-3 border-r bg-muted/30 flex items-center justify-center font-medium text-sm sticky left-0 z-10">
+                      {DAY_LABELS[day]}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {DAY_FULL_LABELS[day]}
+                  </TooltipContent>
+                </Tooltip>
+
+                {/* Semester Cells */}
+                {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => {
+                  const cellKey = `${day}-sem-${sem}`;
+                  const cellEntries = entriesByDayAndSemester[cellKey] || [];
+                  const isDragOver = dragOverCell === cellKey;
+
+                  return (
+                    <div
+                      key={cellKey}
+                      className={cn(
+                        "w-32 shrink-0 min-h-[120px] p-2 border-r transition-colors",
+                        isDragOver && "bg-accent/50"
+                      )}
+                      onDragOver={(e) => handleDragOver(e, cellKey)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, day, `slot-1`)}
+                      data-testid={`cell-semester-${day}-${sem}`}
+                    >
+                      <div className="flex flex-col gap-1.5 w-full h-full justify-start">
+                        {cellEntries.length > 0 ? (
+                          cellEntries.map((entry) => (
+                            <ClassBlock
+                              key={entry.id}
+                              entry={entry}
+                              onClick={() => onEditEntry(entry)}
+                              onDragStart={(e) => handleDragStart(e, entry.id)}
+                              draggable
+                            />
+                          ))
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+
+        {/* Empty State */}
+        {filteredEntries.length === 0 && !isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center p-8 bg-card rounded-lg border shadow-sm pointer-events-auto">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-muted-foreground"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="font-medium text-lg mb-1">No Classes Scheduled</h3>
+              <p className="text-muted-foreground text-sm max-w-xs">
+                Generate a schedule or add classes manually to get started.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Render time-slot view (when semester filter is applied)
   return (
     <div className="flex flex-col h-full" data-testid="schedule-calendar">
       {/* Header with stats */}
@@ -186,9 +320,6 @@ export function ScheduleCalendar({
             <div className="w-20 shrink-0 p-3 border-r font-medium text-sm text-muted-foreground">
               Day
             </div>
-            <div className="w-16 shrink-0 p-3 border-r font-medium text-sm text-muted-foreground">
-              Sem
-            </div>
             {DEFAULT_TIME_SLOTS.map((slot) => {
               const isLunch = isLunchTime(slot.startTime, slot.endTime, lunchBreak);
               return (
@@ -220,20 +351,6 @@ export function ScheduleCalendar({
                   {DAY_FULL_LABELS[day]}
                 </TooltipContent>
               </Tooltip>
-
-              {/* Semester Column */}
-              <div className="w-16 shrink-0 p-3 border-r bg-muted/30 flex items-center justify-center font-medium text-sm sticky left-20 z-10">
-                <div className="flex flex-col items-center gap-1">
-                  {Array.from(semestersByDay[day]).sort((a, b) => a - b).map((sem) => (
-                    <span key={sem} className="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">
-                      {sem}
-                    </span>
-                  ))}
-                  {semestersByDay[day].size === 0 && (
-                    <span className="text-xs text-muted-foreground">-</span>
-                  )}
-                </div>
-              </div>
 
               {/* Time Slot Cells */}
               {DEFAULT_TIME_SLOTS.map((slot) => {
