@@ -213,8 +213,8 @@ export function ScheduleCalendar({
                 <div key={day}>
                   {Array.from({ length: 8 }, (_, i) => i + 1).map((sem, semIndex) => (
                     <div key={`${day}-${sem}`} className="flex border-b last:border-b-0">
-                      {/* Day Label (only for first semester) */}
-                      {semIndex === 0 ? (
+                      {/* Day Label (only for middle semester - S4) */}
+                      {semIndex === 3 ? (
                         <div className={cn(
                           "w-16 shrink-0 p-2 border-r font-medium text-sm text-center bg-muted/30",
                           "row-span-8"
