@@ -1,0 +1,182 @@
+ SESSION – April 2025
+
+
+---
+
+📌 BATCH-35% — Student (41) (36)
+
+SEMESTER – 6
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE3601	Operating System	3	UF
+CSE3602L	Operating System Lab	2	FT
+CSE3603	Web Engineering	3	SB
+CSE3604L	Web Engineering Lab	2+2	SB
+CSE3605	Computer Architecture	3	UF
+CSE3606	Computer Peripherals and Interfacing	3	RM
+CSE3607	Cloud Computing	3	RKP
+CSE3608L	Mobile Application & Java Programming Lab	2+2	—
+Total		22	
+
+
+
+---
+
+📌 BATCH-34 — Student (41) (39)
+
+SEMESTER – 7
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE4701	Computer Networks & Cyber Security	3	RM
+CSE4702L	CN & Cyber Security Lab	2+2	RM
+CSE4703	Software Engineering	3	FT
+CSE4704L	Software Engineering Lab	2+2	FT
+CSE4705	Digital Signal & System	3	TS
+CSE4706	Simulation and Modeling	3	BSS
+CSE4707	Computer Graphics & Animation	3	AND
+CSE4708L	CG & Animation Lab	2+2	RAA
+Total		27	
+
+
+
+---
+
+📌 BATCH-33 — Student (48)
+
+SEMESTER – 8
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE4801	Artificial Intelligence & Expert Systems	3	SH
+CSE4802L	AI & Expert System Lab	2+2	SH
+CSE4803	Technical Writing & Presentation	3	BSS
+CSE4804	Data Warehousing & Data Mining	3	AND
+CSE4805	IT Entrepreneurship	2	RKP
+Total		15	
+
+
+
+---
+
+✅ SESSION – July 2025
+
+
+---
+
+📌 BATCH-41 — Student (50)
+
+SEMESTER – 1
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE1101	Introduction to Computer Systems	2	SA
+CSE1102	Structured Programming Language	3	TA
+CSE1103L	Structured Programming Language Lab	2+2	TA
+MAT1104	Math-I (Calculus)	3	TS
+PHY1105	Physics (Electricity, Magnetism & Optics)	3	DSR
+ENV1106	Environmental Science	2	—
+ENG1107	English Reading & Public Speaking	2	MA
+BAN1108	Bengali	2	NM
+Total		21	
+
+
+
+---
+
+📌 BATCH-40 — Student (48) (Drop-08)
+
+SEMESTER – 2
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE1201	Object Oriented Programming (C++)	3	SA
+CSE1202L	OOP (C++) Lab	2+2	SA
+EEE1203	Electrical & Electronics Circuits	3	DKGIH
+EEE1204L	Electrical & Electronics Circuits Lab	2	KB
+SE1205L	Engineering Drawing & CAD Lab	2+2	SI
+MAT1206	Discrete Mathematics	3	—
+MAT1207	Math-II (Co-ordinate Geometry & Vector Analysis)	2	SS
+ENG1208	English Writing & Communication	2	NK
+Total		23	
+
+
+
+---
+
+📌 BATCH-39 — Student (49)
+
+SEMESTER – 3
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE2301	Data Structures	3	AN
+CSE2302L	Data Structures Lab	2+2	AN
+CSE2303	Digital Logic & System Design	3	AR
+CSE2304L	Digital Logic & System Design Lab	2+2	AR
+STA2305	Statistics & Probability	3	UH
+MAT2306	Math-III (Differential Equation & Special Function)	2	KER
+ECO2307	Industrial Economics	2	SHA
+PG2308	Liberation War of Bangladesh	3	—
+Total		24	
+
+
+
+---
+
+📌 BATCH-38 — Student (51)
+
+SEMESTER – 4 (Drop-06)
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE2401	Algorithm	3	SH
+CSE2402L	Algorithm Lab	2+2	SH
+CSE2403	Microprocessors & Microcontrollers	3	RKP
+CSE2404L	Microcontrollers & Assembly Lab	2+2	RKP
+CSE2405L	Java Programming Lab	2+2	SI
+MAT2406	Numerical Methods	2	MSH
+MAT2407	Math-IV (Matrix & Complex Analysis)	2	MSU
+BBA2408	Introduction to Management & Marketing	2	AM
+Total		24	
+
+
+
+---
+
+📌 BATCH-37 — Student (43)
+
+SEMESTER – 5 (Drop-04)
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE3501	Database Management Systems	3	TS
+CSE3502L	DBMS Lab	2+2	TS
+CSE3503	Computer Graphics & Animation	3	RAA
+CSE3504L	CG & Animation Lab	2+2	RAA
+CSE3505	Communication Engineering	3	TA
+CSE3506	Technical Writing & Presentation	2	FT
+CSE3507	Computer Peripherals & Interfacing	3	AN
+BBA3508	Financial & Managerial Accounting	2	—
+Total		24	
+
+
+
+---
+
+📌 BATCH-36 — Student (11)
+
+SEMESTER – 6
+
+Course Code	Course Name	Credits	Assigned Teacher
+
+CSE3601	Operating System	3	FI
+CSE3602L	Operating System Lab	3	UF
+CSE3603	Computer Networks & Cyber Security	3	MKN
+CSE3604L	CN & Cyber Security Lab	2	RM
+CSE3605	Computer Architecture	3	JF
+CSE3606	Simulation and Modeling	2	BSS
+CSE3607	Computer Ethics & Cyber Law	2	—
+CSE3608L	Mobile Application Lab	2	—
+Total		19
