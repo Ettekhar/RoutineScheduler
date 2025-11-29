@@ -571,8 +571,10 @@ export async function registerRoutes(
 
           if (needsSplit) {
             // Lab: >25 students - split into groups A and B on different days
+            // PRIORITIZE EARLY TIME SLOTS: Loop through time slots first, then days
             const groups = ["A", "B"];
             const usedGroupDays = { A: new Set<string>(), B: new Set<string>() };
+            const batchSemKey = `${batch.id}-${batch.semester}`;
 
             for (const group of groups) {
               const groupKey = `${batch.id}-${group}`;
@@ -581,32 +583,31 @@ export async function registerRoutes(
                 groupDays.set(groupKey, new Set());
               }
 
-              for (let sess = 0; sess < sessionsNeeded; sess++) {
-                // Find least-loaded day for this semester
-                const excludeDaysSet = new Set<string>();
-                if (group === "B") {
-                  for (const d of usedGroupDays.A) excludeDaysSet.add(d);
-                }
-                for (const d of usedGroupDays[group]) excludeDaysSet.add(d);
+              let scheduledCount = 0;
+              const usedLabTimeSlots = batchSemesterLabTimeSlots.get(batchSemKey) || new Set();
+              
+              // Loop through time slot PAIRS first (earliest to latest), then days
+              for (let i = 0; i < timeSlots.length - 1; i++) {
+                if (scheduledCount >= sessionsNeeded) break;
+                
+                const slot1 = timeSlots[i];
+                const slot2 = timeSlots[i + 1];
+                if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
+                    isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
 
-                const bestDay = findLeastLoadedDayForSemester(batch.semester, excludeDaysSet);
-                if (!bestDay) break;
+                // Skip if these time slots already have labs for this batch-semester
+                if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
 
-                // Find 2 consecutive time slots NOT already used by other labs for this batch-semester
-                const usedLabTimeSlots = batchSemesterLabTimeSlots.get(`${batch.id}-${batch.semester}`) || new Set();
-                const batchSemKey = `${batch.id}-${batch.semester}`;
-                let scheduled = false;
-                for (let i = 0; i < timeSlots.length - 1; i++) {
-                  const slot1 = timeSlots[i];
-                  const slot2 = timeSlots[i + 1];
-                  if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
-                      isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
+                for (const day of WORKING_DAYS) {
+                  if (scheduledCount >= sessionsNeeded) break;
+                  
+                  // Skip if group already used this day
+                  if (usedGroupDays[group].has(day)) continue;
+                  // For group B, skip days used by group A to spread across different days
+                  if (group === "B" && usedGroupDays.A.has(day)) continue;
 
-                  // Skip if these time slots already have labs for this batch-semester
-                  if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
-
-                  const slotKey1 = `${bestDay}-${slot1.id}`;
-                  const slotKey2 = `${bestDay}-${slot2.id}`;
+                  const slotKey1 = `${day}-${slot1.id}`;
+                  const slotKey2 = `${day}-${slot2.id}`;
 
                   // STRICT CHECK: No class in this SEMESTER can use these time slots
                   if (semesterTimeSlots.get(batch.semester)?.has(slotKey1) || semesterTimeSlots.get(batch.semester)?.has(slotKey2)) continue;
@@ -626,14 +627,14 @@ export async function registerRoutes(
                   if (!availableRoom) continue;
 
                   for (const s of [slot1, slot2]) {
-                    const sk = `${bestDay}-${s.id}`;
+                    const sk = `${day}-${s.id}`;
                     await storage.createScheduleEntry({
                       courseId: course.id,
                       teacherId: teacher.id,
                       batchId: batch.id,
                       classroomId: availableRoom.id,
                       timeSlotId: s.id,
-                      day: bestDay,
+                      day: day,
                       labGroup: group,
                       hasConflict: false,
                       conflictType: null,
@@ -643,9 +644,9 @@ export async function registerRoutes(
                     batchSlots.get(batch.id)?.add(sk);
                   }
 
-                  groupDays.get(groupKey)?.add(bestDay);
-                  usedGroupDays[group].add(bestDay);
-                  batchLabDays.get(batch.id)?.add(bestDay);
+                  groupDays.get(groupKey)?.add(day);
+                  usedGroupDays[group].add(day);
+                  batchLabDays.get(batch.id)?.add(day);
                   
                   // Track time slots used by labs for this batch-semester
                   if (!batchSemesterLabTimeSlots.has(batchSemKey)) {
@@ -665,18 +666,17 @@ export async function registerRoutes(
                   semesterTimeSlots.get(batch.semester)?.add(slotKey1);
                   semesterTimeSlots.get(batch.semester)?.add(slotKey2);
                   
-                  daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
-                  const semKey = `${batch.semester}-${bestDay}`;
+                  daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 2);
+                  const semKey = `${batch.semester}-${day}`;
                   semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 2);
                   
-                  scheduled = true;
-                  break;
+                  scheduledCount++;
                 }
-                if (!scheduled) break;
               }
             }
           } else {
             // Lab: <=25 students - no grouping
+            // PRIORITIZE EARLY TIME SLOTS: Loop through time slots first, then days
             const groupKey = `${batch.id}-full`;
             if (!groupSlots.has(groupKey)) {
               groupSlots.set(groupKey, new Set());
@@ -687,25 +687,25 @@ export async function registerRoutes(
             const usedLabTimeSlots = batchSemesterLabTimeSlots.get(`${batch.id}-${batch.semester}`) || new Set();
             const batchSemKey = `${batch.id}-${batch.semester}`;
             
-            for (let sess = 0; sess < sessionsNeeded; sess++) {
-              const excludeDaysSet = new Set<string>();
-              for (const d of usedDays) excludeDaysSet.add(d);
+            let scheduledCount = 0;
+            // Loop through time slot PAIRS first (earliest to latest), then days
+            for (let i = 0; i < timeSlots.length - 1; i++) {
+              if (scheduledCount >= sessionsNeeded) break;
+              
+              const slot1 = timeSlots[i];
+              const slot2 = timeSlots[i + 1];
+              if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
+                  isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
 
-              const bestDay = findLeastLoadedDayForSemester(batch.semester, excludeDaysSet);
-              if (!bestDay) break;
+              // Skip if these time slots already have labs for this batch-semester
+              if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
 
-              let scheduled = false;
-              for (let i = 0; i < timeSlots.length - 1; i++) {
-                const slot1 = timeSlots[i];
-                const slot2 = timeSlots[i + 1];
-                if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
-                    isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
+              for (const day of WORKING_DAYS) {
+                if (scheduledCount >= sessionsNeeded) break;
+                if (usedDays.has(day)) continue;
 
-                // Skip if these time slots already have labs for this batch-semester
-                if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
-
-                const slotKey1 = `${bestDay}-${slot1.id}`;
-                const slotKey2 = `${bestDay}-${slot2.id}`;
+                const slotKey1 = `${day}-${slot1.id}`;
+                const slotKey2 = `${day}-${slot2.id}`;
 
                 // STRICT CHECK: No class in this SEMESTER can use these time slots
                 if (semesterTimeSlots.get(batch.semester)?.has(slotKey1) || semesterTimeSlots.get(batch.semester)?.has(slotKey2)) continue;
@@ -725,14 +725,14 @@ export async function registerRoutes(
                 if (!availableRoom) continue;
 
                 for (const s of [slot1, slot2]) {
-                  const sk = `${bestDay}-${s.id}`;
+                  const sk = `${day}-${s.id}`;
                   await storage.createScheduleEntry({
                     courseId: course.id,
                     teacherId: teacher.id,
                     batchId: batch.id,
                     classroomId: availableRoom.id,
                     timeSlotId: s.id,
-                    day: bestDay,
+                    day: day,
                     labGroup: null,
                     hasConflict: false,
                     conflictType: null,
@@ -742,9 +742,9 @@ export async function registerRoutes(
                   batchSlots.get(batch.id)?.add(sk);
                 }
 
-                groupDays.get(groupKey)?.add(bestDay);
-                usedDays.add(bestDay);
-                batchLabDays.get(batch.id)?.add(bestDay);
+                groupDays.get(groupKey)?.add(day);
+                usedDays.add(day);
+                batchLabDays.get(batch.id)?.add(day);
                 
                 // Track time slots used by labs for this batch-semester
                 if (!batchSemesterLabTimeSlots.has(batchSemKey)) {
@@ -764,14 +764,12 @@ export async function registerRoutes(
                 semesterTimeSlots.get(batch.semester)?.add(slotKey1);
                 semesterTimeSlots.get(batch.semester)?.add(slotKey2);
                 
-                daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
-                const semKey = `${batch.semester}-${bestDay}`;
+                daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 2);
+                const semKey = `${batch.semester}-${day}`;
                 semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 2);
                 
-                scheduled = true;
-                break;
+                scheduledCount++;
               }
-              if (!scheduled) break;
             }
           }
         }
