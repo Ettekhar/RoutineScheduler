@@ -199,7 +199,7 @@ export function ScheduleCalendar({
                       key={slot.slotNumber}
                       className={cn(
                         "shrink-0 p-2 border-r text-center font-medium text-xs text-muted-foreground",
-                        isLunch ? "w-20" : "w-24"
+                        isLunch ? "w-24" : "w-40"
                       )}
                     >
                       {isLunch ? "Lunch" : `${slot.startTime}-${slot.endTime}`}
@@ -242,7 +242,7 @@ export function ScheduleCalendar({
                             key={cellKey}
                             className={cn(
                               "shrink-0 min-h-[70px] p-1.5 border-r transition-colors",
-                              isLunch ? "w-20" : "w-24",
+                              isLunch ? "w-24" : "w-40",
                               isDragOver && !isLunch && "bg-accent/50",
                               isLunch && "bg-orange-100/50 dark:bg-orange-950/40 flex items-center justify-center"
                             )}
