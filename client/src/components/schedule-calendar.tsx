@@ -83,12 +83,12 @@ export function ScheduleCalendar({
     });
   }, [entries, filters]);
 
-  // Group entries by day and semester (for all semester view)
-  const entriesByDayAndSemester = useMemo(() => {
+  // Group entries by day, semester, and time slot (for all semester view)
+  const entriesByDaySemanticSlot = useMemo(() => {
     const grouped: Record<string, ScheduleEntryWithDetails[]> = {};
     
     filteredEntries.forEach((entry) => {
-      const key = `${entry.day}-sem-${entry.batch.semester}`;
+      const key = `${entry.day}-sem-${entry.batch.semester}-${entry.timeSlotId}`;
       if (!grouped[key]) {
         grouped[key] = [];
       }
@@ -180,73 +180,87 @@ export function ScheduleCalendar({
           </div>
         </div>
 
-        {/* Semester Grid */}
+        {/* Semester Grid for each day */}
         <ScrollArea className="flex-1">
-          <div className="min-w-max">
-            {/* Semester Header */}
-            <div className="flex sticky top-0 z-20 bg-card border-b">
-              <div className="w-20 shrink-0 p-3 border-r font-medium text-sm text-muted-foreground">
-                Day
-              </div>
-              {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => (
-                <div
-                  key={sem}
-                  className="w-32 shrink-0 p-3 border-r text-center font-medium text-sm text-muted-foreground"
-                >
-                  S{sem}
-                </div>
-              ))}
-            </div>
-
-            {/* Day Rows */}
+          <div className="space-y-6 p-4">
             {WORKING_DAYS.map((day) => (
-              <div key={day} className="flex border-b">
-                {/* Day Label */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="w-20 shrink-0 p-3 border-r bg-muted/30 flex items-center justify-center font-medium text-sm sticky left-0 z-10">
-                      {DAY_LABELS[day]}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    {DAY_FULL_LABELS[day]}
-                  </TooltipContent>
-                </Tooltip>
+              <div key={day} className="border rounded-lg overflow-hidden">
+                {/* Day Header */}
+                <div className="bg-muted/40 px-4 py-2 border-b font-medium text-sm">
+                  {DAY_FULL_LABELS[day]}
+                </div>
 
-                {/* Semester Cells */}
-                {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => {
-                  const cellKey = `${day}-sem-${sem}`;
-                  const cellEntries = entriesByDayAndSemester[cellKey] || [];
-                  const isDragOver = dragOverCell === cellKey;
-
-                  return (
-                    <div
-                      key={cellKey}
-                      className={cn(
-                        "w-32 shrink-0 min-h-[120px] p-2 border-r transition-colors",
-                        isDragOver && "bg-accent/50"
-                      )}
-                      onDragOver={(e) => handleDragOver(e, cellKey)}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, day, `slot-1`)}
-                      data-testid={`cell-semester-${day}-${sem}`}
-                    >
-                      <div className="flex flex-col gap-1.5 w-full h-full justify-start">
-                        {cellEntries.length > 0 ? (
-                          cellEntries.map((entry) => (
-                            <ClassBlock
-                              key={entry.id}
-                              entry={entry}
-                              onClick={() => onEditEntry(entry)}
-                              onDragStart={(e) => handleDragStart(e, entry.id)}
-                              draggable
-                            />
-                          ))
-                        ) : null}
+                {/* Day's Semester x TimeSlot Grid */}
+                <div className="overflow-x-auto">
+                  <div className="inline-block min-w-full">
+                    {/* Semester Column Headers */}
+                    <div className="flex border-b">
+                      <div className="w-24 shrink-0 p-2 border-r font-medium text-sm text-muted-foreground">
+                        Time
                       </div>
+                      {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => (
+                        <div
+                          key={sem}
+                          className="w-28 shrink-0 p-2 border-r text-center font-medium text-sm text-muted-foreground"
+                        >
+                          S{sem}
+                        </div>
+                      ))}
                     </div>
-                  );
-                })}
+
+                    {/* Time Slot Rows */}
+                    {DEFAULT_TIME_SLOTS.map((slot) => {
+                      const isLunch = isLunchTime(slot.startTime, slot.endTime, lunchBreak);
+                      return (
+                        <div key={slot.slotNumber} className="flex border-b last:border-b-0">
+                          {/* Time Label */}
+                          <div className={cn(
+                            "w-24 shrink-0 p-2 border-r font-medium text-xs text-muted-foreground",
+                            isLunch && "bg-orange-100/50 dark:bg-orange-950/40"
+                          )}>
+                            {isLunch ? "Lunch" : `${slot.startTime}-${slot.endTime}`}
+                          </div>
+
+                          {/* Semester Cells */}
+                          {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => {
+                            const cellKey = `${day}-sem-${sem}-slot-${slot.slotNumber}`;
+                            const cellEntries = entriesByDaySemanticSlot[`${day}-sem-${sem}-slot-${slot.slotNumber}`] || [];
+                            const isDragOver = dragOverCell === cellKey;
+
+                            return (
+                              <div
+                                key={cellKey}
+                                className={cn(
+                                  "w-28 shrink-0 min-h-[80px] p-1.5 border-r transition-colors",
+                                  isDragOver && !isLunch && "bg-accent/50",
+                                  isLunch && "bg-orange-100/50 dark:bg-orange-950/40 flex items-center justify-center"
+                                )}
+                                onDragOver={(e) => handleDragOver(e, cellKey)}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, day, `slot-${slot.slotNumber}`)}
+                                data-testid={`cell-${day}-sem-${sem}-${slot.slotNumber}`}
+                              >
+                                <div className="flex flex-col gap-0.5 w-full h-full justify-start">
+                                  {!isLunch && cellEntries.length > 0 && (
+                                    cellEntries.map((entry) => (
+                                      <ClassBlock
+                                        key={entry.id}
+                                        entry={entry}
+                                        onClick={() => onEditEntry(entry)}
+                                        onDragStart={(e) => handleDragStart(e, entry.id)}
+                                        draggable
+                                      />
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
