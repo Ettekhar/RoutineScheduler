@@ -27,6 +27,10 @@ export default function Export() {
     queryKey: ["/api/schedule"],
   });
 
+  const { data: sessions = [] } = useQuery<Array<{ id: string; name: string }>>({
+    queryKey: ["/api/sessions"],
+  });
+
   const handleExport = async (options: ExportOptions) => {
     try {
       // Filter entries based on export options
@@ -43,6 +47,9 @@ export default function Export() {
       } else if (options.type === "day" && options.day) {
         filteredEntries = entries.filter(e => e.day === options.day);
         title = `Schedule - ${DAY_LABELS[options.day]}`;
+      } else if (options.type === "session" && options.session) {
+        filteredEntries = entries.filter(e => e.session === options.session);
+        title = `Schedule - ${options.session}`;
       }
 
       // Generate PDF content
@@ -64,7 +71,7 @@ export default function Export() {
     }
   };
 
-  return <ExportPanel teachers={teachers} batches={batches} entries={entries} onExport={handleExport} />;
+  return <ExportPanel teachers={teachers} batches={batches} entries={entries} sessions={sessions} currentSession={sessions[0]?.name} onExport={handleExport} />;
 }
 
 function generatePDFContent(

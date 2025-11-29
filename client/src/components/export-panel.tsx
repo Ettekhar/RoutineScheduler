@@ -36,22 +36,26 @@ interface ExportPanelProps {
   teachers: Teacher[];
   batches: Batch[];
   entries: ScheduleEntryWithDetails[];
+  sessions?: Array<{ id: string; name: string }>;
+  currentSession?: string;
   onExport: (options: ExportOptions) => Promise<void>;
 }
 
 export interface ExportOptions {
   format: "pdf";
-  type: "full" | "teacher" | "semester" | "day";
+  type: "full" | "teacher" | "semester" | "day" | "session";
   teacherId?: string;
   semester?: number;
   day?: WorkingDay;
+  session?: string;
 }
 
-export function ExportPanel({ teachers, batches, entries, onExport }: ExportPanelProps) {
+export function ExportPanel({ teachers, batches, entries, sessions = [], currentSession = "Fall 2025", onExport }: ExportPanelProps) {
   const [exportType, setExportType] = useState<ExportOptions["type"]>("full");
   const [selectedTeacher, setSelectedTeacher] = useState<string>("");
   const [selectedSemester, setSelectedSemester] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
+  const [selectedSession, setSelectedSession] = useState<string>(currentSession);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
 
@@ -73,6 +77,8 @@ export function ExportPanel({ teachers, batches, entries, onExport }: ExportPane
         options.semester = parseInt(selectedSemester);
       } else if (exportType === "day" && selectedDay) {
         options.day = selectedDay as WorkingDay;
+      } else if (exportType === "session" && selectedSession) {
+        options.session = selectedSession;
       }
 
       await onExport(options);
@@ -88,6 +94,7 @@ export function ExportPanel({ teachers, batches, entries, onExport }: ExportPane
     if (exportType === "teacher" && !selectedTeacher) return false;
     if (exportType === "semester" && !selectedSemester) return false;
     if (exportType === "day" && !selectedDay) return false;
+    if (exportType === "session" && !selectedSession) return false;
     return true;
   };
 
@@ -101,6 +108,8 @@ export function ExportPanel({ teachers, batches, entries, onExport }: ExportPane
       filteredEntries = entries.filter(e => e.batch.semester === parseInt(selectedSemester));
     } else if (exportType === "day" && selectedDay) {
       filteredEntries = entries.filter(e => e.day === selectedDay);
+    } else if (exportType === "session" && selectedSession) {
+      filteredEntries = entries.filter(e => e.session === selectedSession);
     }
 
     const theoryCount = filteredEntries.filter(e => e.course.courseType === "theory").length;
@@ -169,6 +178,14 @@ export function ExportPanel({ teachers, batches, entries, onExport }: ExportPane
                 onClick={() => setExportType("day")}
                 testId="button-export-day"
               />
+              <ExportTypeButton
+                icon={<Calendar className="w-5 h-5" />}
+                title="By Session"
+                description="Academic session routine"
+                isSelected={exportType === "session"}
+                onClick={() => setExportType("session")}
+                testId="button-export-session"
+              />
             </div>
           </CardContent>
         </Card>
@@ -227,6 +244,24 @@ export function ExportPanel({ teachers, batches, entries, onExport }: ExportPane
                       {WORKING_DAYS.map((day) => (
                         <SelectItem key={day} value={day}>
                           {DAY_LABELS[day]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {exportType === "session" && (
+                <div className="space-y-2">
+                  <Label>Select Session</Label>
+                  <Select value={selectedSession} onValueChange={setSelectedSession}>
+                    <SelectTrigger data-testid="select-export-session">
+                      <SelectValue placeholder="Choose a session" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sessions.map((session) => (
+                        <SelectItem key={session.id} value={session.name}>
+                          {session.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
