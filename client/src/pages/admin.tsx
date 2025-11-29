@@ -210,6 +210,29 @@ export default function Admin() {
     },
   });
 
+  const updateSessionMutation = useMutation({
+    mutationFn: ({ id, sessionName }: { id: string; sessionName: string }) => 
+      apiRequest("PATCH", `/api/sessions/${id}`, { sessionName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
+      toast({ title: "Session Updated", description: "Session has been updated successfully." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteSessionMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/sessions/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
+      toast({ title: "Session Deleted", description: "Session has been deleted successfully." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   return (
     <AdminPanel
       teachers={teachers}
@@ -220,6 +243,8 @@ export default function Admin() {
       currentSession={sessionsData?.current || "Fall 2025"}
       onSetSession={(session) => setSessionMutation.mutateAsync(session)}
       onCreateSession={(session) => createSessionMutation.mutateAsync(session)}
+      onUpdateSession={(id, name) => updateSessionMutation.mutateAsync({ id, name })}
+      onDeleteSession={(id) => deleteSessionMutation.mutateAsync(id)}
       onAddTeacher={(data) => addTeacherMutation.mutateAsync(data)}
       onUpdateTeacher={(id, data) => updateTeacherMutation.mutateAsync({ id, data })}
       onDeleteTeacher={(id) => deleteTeacherMutation.mutateAsync(id)}

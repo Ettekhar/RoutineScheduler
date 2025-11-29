@@ -898,5 +898,32 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/sessions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { sessionName } = req.body;
+      if (!sessionName || typeof sessionName !== 'string') {
+        return res.status(400).json({ message: "sessionName is required and must be a string" });
+      }
+      const session = await storage.updateSession(id, sessionName);
+      res.json(session);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/sessions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteSession(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   return httpServer;
 }

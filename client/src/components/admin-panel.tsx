@@ -79,6 +79,8 @@ interface AdminPanelProps {
   currentSession?: string;
   onSetSession?: (session: string) => Promise<void>;
   onCreateSession?: (session: string) => Promise<void>;
+  onUpdateSession?: (id: string, name: string) => Promise<void>;
+  onDeleteSession?: (id: string) => Promise<void>;
   onAddTeacher: (data: z.infer<typeof insertTeacherSchema>) => Promise<void>;
   onUpdateTeacher: (id: string, data: z.infer<typeof insertTeacherSchema>) => Promise<void>;
   onDeleteTeacher: (id: string) => Promise<void>;
@@ -103,6 +105,8 @@ export function AdminPanel({
   currentSession = "Fall 2025",
   onSetSession,
   onCreateSession,
+  onUpdateSession,
+  onDeleteSession,
   onAddTeacher,
   onUpdateTeacher,
   onDeleteTeacher,
@@ -119,6 +123,8 @@ export function AdminPanel({
 }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState("teachers");
   const [newSessionName, setNewSessionName] = useState("");
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingSessionName, setEditingSessionName] = useState("");
 
   return (
     <div className="h-full flex flex-col" data-testid="admin-panel">
@@ -224,22 +230,105 @@ export function AdminPanel({
                   <CardTitle>Available Sessions ({sessions.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {sessions.map((session) => (
-                      <Button
-                        key={session.id}
-                        variant={currentSession === session.name ? "default" : "outline"}
-                        className="justify-start"
-                        onClick={() => onSetSession?.(session.name)}
-                        data-testid={`button-set-session-${session.name}`}
-                      >
-                        {session.name}
-                        {currentSession === session.name && (
-                          <span className="ml-auto text-xs font-semibold">Active</span>
-                        )}
-                      </Button>
-                    ))}
-                  </div>
+                  {sessions.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No sessions available</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {sessions.map((session) => (
+                        <div key={session.id} className="flex items-center justify-between p-2 rounded border bg-card">
+                          <div className="flex items-center gap-2 flex-1">
+                            <Button
+                              variant={currentSession === session.name ? "default" : "ghost"}
+                              className="justify-start flex-1"
+                              onClick={() => onSetSession?.(session.name)}
+                              data-testid={`button-set-session-${session.name}`}
+                            >
+                              {session.name}
+                              {currentSession === session.name && (
+                                <span className="ml-auto text-xs font-semibold">Active</span>
+                              )}
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingSessionId(session.id);
+                                    setEditingSessionName(session.name);
+                                  }}
+                                  data-testid={`button-edit-session-${session.id}`}
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Edit Session</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-3">
+                                  <Input
+                                    placeholder="Session name"
+                                    value={editingSessionName}
+                                    onChange={(e) => setEditingSessionName(e.target.value)}
+                                    data-testid="input-edit-session-name"
+                                  />
+                                  <div className="flex gap-2 justify-end">
+                                    <Button variant="outline" onClick={() => setEditingSessionId(null)}>
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      onClick={() => {
+                                        if (editingSessionName.trim()) {
+                                          onUpdateSession?.(editingSessionId!, editingSessionName.trim());
+                                          setEditingSessionId(null);
+                                          setEditingSessionName("");
+                                        }
+                                      }}
+                                      data-testid="button-save-session"
+                                    >
+                                      Save
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  disabled={currentSession === session.name}
+                                  data-testid={`button-delete-session-${session.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4 text-destructive" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Session</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete "{session.name}"? All schedules for this session will be deleted.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => onDeleteSession?.(session.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

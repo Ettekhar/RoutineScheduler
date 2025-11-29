@@ -79,6 +79,8 @@ export interface IStorage {
   getCurrentSession(): Promise<string>;
   setCurrentSession(sessionName: string): Promise<string>;
   addSession(sessionName: string): Promise<{ id: string; name: string }>;
+  updateSession(id: string, newName: string): Promise<{ id: string; name: string }>;
+  deleteSession(id: string): Promise<boolean>;
   clearScheduleForSession(sessionName: string): Promise<void>;
 }
 
@@ -467,6 +469,57 @@ export class MemStorage implements IStorage {
     const session = { id, name: sessionName };
     this.sessions.set(id, session);
     return session;
+  }
+
+  async updateSession(id: string, newName: string): Promise<{ id: string; name: string }> {
+    const session = this.sessions.get(id);
+    if (!session) {
+      throw new Error(`Session with ID "${id}" not found`);
+    }
+
+    // Check if new name already exists
+    const exists = Array.from(this.sessions.values()).some(s => s.name === newName && s.id !== id);
+    if (exists) {
+      throw new Error(`Session "${newName}" already exists`);
+    }
+
+    // Update all schedule entries with old session name to new session name
+    for (const entry of this.scheduleEntries.values()) {
+      if (entry.session === session.name) {
+        entry.session = newName;
+      }
+    }
+
+    session.name = newName;
+    this.sessions.set(id, session);
+    return session;
+  }
+
+  async deleteSession(id: string): Promise<boolean> {
+    const session = this.sessions.get(id);
+    if (!session) return false;
+
+    // Don't allow deleting if it's the current session
+    if (this.currentSession === session.name) {
+      throw new Error(`Cannot delete the current session "${session.name}". Switch to another session first.`);
+    }
+
+    // Delete all schedule entries for this session
+    const entriesToDelete = Array.from(this.scheduleEntries.entries())
+      .filter(([_, entry]) => entry.session === session.name);
+
+    for (const [entryId, entry] of entriesToDelete) {
+      // Update teacher loads
+      const teacher = await this.getTeacher(entry.teacherId);
+      if (teacher) {
+        await this.updateTeacher(teacher.id, { 
+          currentLoad: Math.max(0, teacher.currentLoad - 1) 
+        } as any);
+      }
+      this.scheduleEntries.delete(entryId);
+    }
+
+    return this.sessions.delete(id);
   }
 }
 
