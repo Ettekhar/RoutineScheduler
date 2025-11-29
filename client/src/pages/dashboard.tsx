@@ -6,6 +6,22 @@ import { DashboardStats } from "@/components/dashboard-stats";
 import { LunchBreakSettings } from "@/components/lunch-break-settings";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   Play, 
   RefreshCw, 
@@ -26,6 +42,10 @@ import type {
 
 export default function Dashboard() {
   const { toast } = useToast();
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const [selectedSession, setSelectedSession] = useState("");
+  const [newSessionName, setNewSessionName] = useState("");
 
   const { data: teachers = [] } = useQuery<Teacher[]>({
     queryKey: ["/api/teachers"],
@@ -55,18 +75,26 @@ export default function Dashboard() {
     queryKey: ["/api/lunch-break"],
   });
 
+  const { data: sessionsData } = useQuery({
+    queryKey: ["/api/sessions"],
+  });
+
   const generateMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/schedule/generate");
+    mutationFn: async (sessionName: string) => {
+      return apiRequest("POST", "/api/schedule/generate", { sessionName });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schedule"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/teachers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
       toast({
         title: "Schedule Generated",
         description: "A new conflict-free schedule has been created.",
       });
+      setShowGenerateDialog(false);
+      setSelectedSession("");
+      setNewSessionName("");
     },
     onError: (error: Error) => {
       toast({
@@ -78,17 +106,20 @@ export default function Dashboard() {
   });
 
   const clearMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("DELETE", "/api/schedule");
+    mutationFn: async (sessionName: string) => {
+      return apiRequest("DELETE", "/api/schedule", { sessionName });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schedule"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/teachers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
       toast({
         title: "Schedule Cleared",
         description: "All scheduled classes have been removed.",
       });
+      setShowClearDialog(false);
+      setSelectedSession("");
     },
   });
 
@@ -106,8 +137,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex-1 overflow-auto p-6" data-testid="dashboard-page">
-      <div className="max-w-screen-xl mx-auto space-y-8">
+    <>
+      <div className="flex-1 overflow-auto p-6" data-testid="dashboard-page">
+        <div className="max-w-screen-xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -120,7 +152,7 @@ export default function Dashboard() {
             {entries.length > 0 && (
               <Button
                 variant="outline"
-                onClick={() => clearMutation.mutate()}
+                onClick={() => setShowClearDialog(true)}
                 disabled={clearMutation.isPending}
                 data-testid="button-clear-schedule"
               >
@@ -133,7 +165,7 @@ export default function Dashboard() {
               </Button>
             )}
             <Button
-              onClick={() => generateMutation.mutate()}
+              onClick={() => setShowGenerateDialog(true)}
               disabled={!canGenerate || generateMutation.isPending}
               data-testid="button-generate-schedule"
             >
@@ -255,5 +287,142 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+
+      {/* Generate Schedule Dialog */}
+      <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+        <DialogContent data-testid="dialog-generate-schedule">
+          <DialogHeader>
+            <DialogTitle>Generate Schedule</DialogTitle>
+            <DialogDescription>Select a session to generate the schedule for</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Choose Session</label>
+              <Select value={selectedSession} onValueChange={setSelectedSession}>
+                <SelectTrigger data-testid="select-session-generate">
+                  <SelectValue placeholder="Select a session" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sessionsData?.sessions?.map((session: any) => (
+                    <SelectItem key={session.id} value={session.name}>
+                      {session.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Or Create New Session</label>
+              <Input
+                placeholder="New session name"
+                value={newSessionName}
+                onChange={(e) => setNewSessionName(e.target.value)}
+                data-testid="input-new-session-name"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowGenerateDialog(false);
+                setSelectedSession("");
+                setNewSessionName("");
+              }}
+              data-testid="button-cancel-generate"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                const sessionToUse = newSessionName.trim() || selectedSession;
+                if (sessionToUse) {
+                  generateMutation.mutate(sessionToUse);
+                } else {
+                  toast({
+                    title: "Error",
+                    description: "Please select or create a session",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              disabled={generateMutation.isPending}
+              data-testid="button-confirm-generate"
+            >
+              {generateMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                "Generate"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Schedule Dialog */}
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <DialogContent data-testid="dialog-clear-schedule">
+          <DialogHeader>
+            <DialogTitle>Clear Schedule</DialogTitle>
+            <DialogDescription>Select a session to clear the schedule for</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Choose Session</label>
+            <Select value={selectedSession} onValueChange={setSelectedSession}>
+              <SelectTrigger data-testid="select-session-clear">
+                <SelectValue placeholder="Select a session" />
+              </SelectTrigger>
+              <SelectContent>
+                {sessionsData?.sessions?.map((session: any) => (
+                  <SelectItem key={session.id} value={session.name}>
+                    {session.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowClearDialog(false);
+                setSelectedSession("");
+              }}
+              data-testid="button-cancel-clear"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (selectedSession) {
+                  clearMutation.mutate(selectedSession);
+                } else {
+                  toast({
+                    title: "Error",
+                    description: "Please select a session",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              disabled={clearMutation.isPending}
+              data-testid="button-confirm-clear"
+            >
+              {clearMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Clearing...
+                </>
+              ) : (
+                "Clear"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

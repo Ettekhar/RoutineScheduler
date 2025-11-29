@@ -286,8 +286,9 @@ export async function registerRoutes(
 
   app.delete("/api/schedule", async (req, res) => {
     try {
-      const currentSession = await storage.getCurrentSession();
-      await storage.clearScheduleForSession(currentSession);
+      const { sessionName } = req.body || {};
+      const session = sessionName || await storage.getCurrentSession();
+      await storage.clearScheduleForSession(session);
       res.status(204).send();
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -349,11 +350,17 @@ export async function registerRoutes(
   // Generate Schedule
   app.post("/api/schedule/generate", async (req, res) => {
     try {
-      // Get current session
-      const currentSession = await storage.getCurrentSession();
+      // Get session from request or use current
+      const { sessionName } = req.body || {};
+      const currentSession = sessionName || await storage.getCurrentSession();
+      
+      // If sessionName provided, set it as current
+      if (sessionName) {
+        await storage.setCurrentSession(sessionName);
+      }
 
-      // Clear existing schedule
-      await storage.clearSchedule();
+      // Clear existing schedule for this session
+      await storage.clearScheduleForSession(currentSession);
 
       const teachers = await storage.getTeachers();
       const courses = await storage.getCourses();
