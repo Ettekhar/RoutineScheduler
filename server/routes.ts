@@ -643,6 +643,9 @@ export async function registerRoutes(
                   batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
                   
                   // STRICT: Mark these times as occupied for this batch-semester
+                  if (!batchSemesterTimeSlots.has(batchSemKey)) {
+                    batchSemesterTimeSlots.set(batchSemKey, new Set());
+                  }
                   batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey1);
                   batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey2);
                   
@@ -733,6 +736,9 @@ export async function registerRoutes(
                 batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
                 
                 // STRICT: Mark these times as occupied for this batch-semester
+                if (!batchSemesterTimeSlots.has(batchSemKey)) {
+                  batchSemesterTimeSlots.set(batchSemKey, new Set());
+                }
                 batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey1);
                 batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey2);
                 
