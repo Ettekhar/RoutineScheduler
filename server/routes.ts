@@ -360,10 +360,12 @@ export async function registerRoutes(
       const groupSlots = new Map<string, Set<string>>(); // For batch + group combinations
       const batchSlots = new Map<string, Set<string>>(); // Track entire batch occupancy (blocks all students)
       const groupDays = new Map<string, Set<string>>(); // Track which days each group is used
+      const daySlotCounts = new Map<string, number>(); // Track how many classes per day to balance load
 
       teachers.forEach(t => teacherSlots.set(t.id, new Set()));
       classrooms.forEach(r => roomSlots.set(r.id, new Set()));
       batches.forEach(b => batchSlots.set(b.id, new Set()));
+      WORKING_DAYS.forEach(d => daySlotCounts.set(d, 0));
 
       // Assign teachers to courses (round-robin)
       const courseTeachers = new Map<string, Teacher>();
@@ -412,14 +414,27 @@ export async function registerRoutes(
             }
 
             let sessionsScheduled = 0;
-            for (const day of daysInOrder) {
-              if (sessionsScheduled >= sessionsNeeded) break;
+            while (sessionsScheduled < sessionsNeeded) {
+              // Find the day with the least classes scheduled so far
+              let leastLoadedDay = WORKING_DAYS[0];
+              let minCount = daySlotCounts.get(leastLoadedDay) || 0;
               
+              for (const day of WORKING_DAYS) {
+                const count = daySlotCounts.get(day) || 0;
+                if (count < minCount) {
+                  leastLoadedDay = day;
+                  minCount = count;
+                }
+              }
+
               let dayScheduled = false;
-              for (const timeSlot of timeSlots) {
-                if (dayScheduled) break; // Only 1 session per day for theory classes
-                
-                const slotKey = `${day}-${timeSlot.id}`;
+              // Try to schedule on the least-loaded day
+              // Rotate through time slots to spread across hours
+              const slotStartIdx = Math.floor(Math.random() * (timeSlots.length - 1));
+              
+              for (let i = 0; i < timeSlots.length; i++) {
+                const timeSlot = timeSlots[(slotStartIdx + i) % timeSlots.length];
+                const slotKey = `${leastLoadedDay}-${timeSlot.id}`;
 
                 // Skip lunch time slots
                 if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
@@ -449,7 +464,7 @@ export async function registerRoutes(
                   batchId: batch.id,
                   classroomId: availableRoom.id,
                   timeSlotId: timeSlot.id,
-                  day,
+                  day: leastLoadedDay,
                   labGroup: null,
                   hasConflict: false,
                   conflictType: null,
@@ -460,17 +475,19 @@ export async function registerRoutes(
                 roomSlots.get(availableRoom.id)?.add(slotKey);
                 groupSlots.get(groupKey)?.add(slotKey);
                 batchSlots.get(batch.id)?.add(slotKey);
-                groupDays.get(groupKey)?.add(day);
+                groupDays.get(groupKey)?.add(leastLoadedDay);
+                daySlotCounts.set(leastLoadedDay, (daySlotCounts.get(leastLoadedDay) || 0) + 1);
 
                 dayScheduled = true;
                 sessionsScheduled++;
+                break;
               }
+              
+              if (!dayScheduled) break; // Could not schedule - stop trying
             }
           } else if (needsSplit) {
             // Lab classes with >25 students: split into groups
             const groups = ["A", "B"];
-            let groupAScheduled = 0;
-            let groupBScheduled = 0;
 
             for (const group of groups) {
               const groupKey = `${batch.id}-${group}`;
@@ -481,20 +498,32 @@ export async function registerRoutes(
 
               let sessionsScheduled = 0;
               
-              // Try to schedule on different days for each group
-              for (const day of daysInOrder) {
-                if (sessionsScheduled >= sessionsNeeded) break;
-
-                // For group B, try to use different days than group A
-                if (group === "B" && groupDays.get(`${batch.id}-A`)?.has(day)) {
-                  continue;
+              // Try to schedule on least-loaded days for this group
+              while (sessionsScheduled < sessionsNeeded) {
+                // Find the day with the least classes, excluding days already used by other group
+                let bestDay: WorkingDay | null = null;
+                let minCount = Infinity;
+                
+                for (const day of WORKING_DAYS) {
+                  // For group B, skip days already used by group A
+                  if (group === "B" && groupDays.get(`${batch.id}-A`)?.has(day)) {
+                    continue;
+                  }
+                  
+                  const count = daySlotCounts.get(day) || 0;
+                  if (count < minCount) {
+                    bestDay = day;
+                    minCount = count;
+                  }
                 }
 
-                // Find 2 consecutive slots for lab
-                let availableRoom: Classroom | undefined;
+                if (!bestDay) break; // No available days
+
+                // Try to find 2 consecutive slots on this day
+                let scheduled = false;
                 for (const room of suitableRooms) {
                   const consecutive = findConsecutiveSlots(
-                    day,
+                    bestDay,
                     groupKey,
                     batch.id,
                     teacher,
@@ -508,20 +537,19 @@ export async function registerRoutes(
                   );
 
                   if (consecutive) {
-                    availableRoom = room;
                     const { slot1, slot2 } = consecutive;
 
                     // Create entries for both consecutive slots
                     for (const slot of [slot1, slot2]) {
-                      const slotKey = `${day}-${slot.id}`;
+                      const slotKey = `${bestDay}-${slot.id}`;
                       
                       await storage.createScheduleEntry({
                         courseId: course.id,
                         teacherId: teacher.id,
                         batchId: batch.id,
-                        classroomId: availableRoom.id,
+                        classroomId: room.id,
                         timeSlotId: slot.id,
-                        day,
+                        day: bestDay,
                         labGroup: group,
                         hasConflict: false,
                         conflictType: null,
@@ -529,16 +557,20 @@ export async function registerRoutes(
 
                       // Mark slots as occupied - for lab groups, mark specific group AND batch
                       teacherSlots.get(teacher.id)?.add(slotKey);
-                      roomSlots.get(availableRoom.id)?.add(slotKey);
+                      roomSlots.get(room.id)?.add(slotKey);
                       groupSlots.get(groupKey)?.add(slotKey);
                       batchSlots.get(batch.id)?.add(slotKey);
                     }
 
-                    groupDays.get(groupKey)?.add(day);
+                    groupDays.get(groupKey)?.add(bestDay);
+                    daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
                     sessionsScheduled++;
+                    scheduled = true;
                     break;
                   }
                 }
+
+                if (!scheduled) break; // Could not schedule on this day - stop trying
               }
             }
           } else {
@@ -550,14 +582,26 @@ export async function registerRoutes(
             }
 
             let sessionsScheduled = 0;
-            for (const day of daysInOrder) {
-              if (sessionsScheduled >= sessionsNeeded) break;
+            while (sessionsScheduled < sessionsNeeded) {
+              // Find the day with the least classes scheduled
+              let bestDay: WorkingDay | null = null;
+              let minCount = Infinity;
+              
+              for (const day of WORKING_DAYS) {
+                const count = daySlotCounts.get(day) || 0;
+                if (count < minCount) {
+                  bestDay = day;
+                  minCount = count;
+                }
+              }
 
-              // Find 2 consecutive slots for lab
-              let availableRoom: Classroom | undefined;
+              if (!bestDay) break; // No available days
+
+              // Try to find 2 consecutive slots on this day
+              let scheduled = false;
               for (const room of suitableRooms) {
                 const consecutive = findConsecutiveSlots(
-                  day,
+                  bestDay,
                   groupKey,
                   batch.id,
                   teacher,
@@ -571,20 +615,19 @@ export async function registerRoutes(
                 );
 
                 if (consecutive) {
-                  availableRoom = room;
                   const { slot1, slot2 } = consecutive;
 
                   // Create entries for both consecutive slots
                   for (const slot of [slot1, slot2]) {
-                    const slotKey = `${day}-${slot.id}`;
+                    const slotKey = `${bestDay}-${slot.id}`;
                     
                     await storage.createScheduleEntry({
                       courseId: course.id,
                       teacherId: teacher.id,
                       batchId: batch.id,
-                      classroomId: availableRoom.id,
+                      classroomId: room.id,
                       timeSlotId: slot.id,
-                      day,
+                      day: bestDay,
                       labGroup: null,
                       hasConflict: false,
                       conflictType: null,
@@ -592,16 +635,20 @@ export async function registerRoutes(
 
                     // Mark slots as occupied - for lab without grouping, mark batch
                     teacherSlots.get(teacher.id)?.add(slotKey);
-                    roomSlots.get(availableRoom.id)?.add(slotKey);
+                    roomSlots.get(room.id)?.add(slotKey);
                     groupSlots.get(groupKey)?.add(slotKey);
                     batchSlots.get(batch.id)?.add(slotKey);
                   }
 
-                  groupDays.get(groupKey)?.add(day);
+                  groupDays.get(groupKey)?.add(bestDay);
+                  daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
                   sessionsScheduled++;
+                  scheduled = true;
                   break;
                 }
               }
+
+              if (!scheduled) break; // Could not schedule - stop trying
             }
           }
         }
