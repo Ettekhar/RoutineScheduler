@@ -344,6 +344,9 @@ export async function registerRoutes(
   // Generate Schedule
   app.post("/api/schedule/generate", async (req, res) => {
     try {
+      // Get current session
+      const currentSession = await storage.getCurrentSession();
+
       // Clear existing schedule
       await storage.clearSchedule();
 
@@ -548,6 +551,7 @@ export async function registerRoutes(
                 labGroup: null,
                 hasConflict: false,
                 conflictType: null,
+                session: currentSession,
               });
 
               teacherSlots.get(teacher.id)?.add(slotKey);
@@ -674,6 +678,7 @@ export async function registerRoutes(
                       labGroup: group,
                       hasConflict: false,
                       conflictType: null,
+                      session: currentSession,
                     });
                     teacherSlots.get(teacher.id)?.add(sk);
                     roomSlots.get(availableRoom.id)?.add(sk);

@@ -46,9 +46,12 @@ export default function Schedule() {
     queryKey: ["/api/timeslots"],
   });
 
-  const { data: entries = [], isLoading } = useQuery<ScheduleEntryWithDetails[]>({
+  const { data: allEntries = [], isLoading } = useQuery<ScheduleEntryWithDetails[]>({
     queryKey: ["/api/schedule"],
   });
+
+  // Filter entries by current session
+  const entries = allEntries.filter(entry => entry.session === sessionsData?.current || entry.session === "Fall 2025");
 
   const { data: lunchBreak } = useQuery({
     queryKey: ["/api/lunch-break"],
@@ -168,6 +171,7 @@ export default function Schedule() {
   const handleSessionChange = async (sessionName: string) => {
     await apiRequest("POST", "/api/sessions/set", { sessionName });
     queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/schedule"] });
   };
 
   return (
