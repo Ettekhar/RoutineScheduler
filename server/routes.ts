@@ -461,7 +461,7 @@ export async function registerRoutes(
         return minDay;
       };
 
-      // PHASE 1: Schedule ALL theory classes first - smart distribution
+      // PHASE 1: Schedule ALL theory classes first - prioritize EARLY time slots
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
         const batchCourses = courses.filter(c => c.semester === batch.semester && c.courseType === "theory");
@@ -484,20 +484,20 @@ export async function registerRoutes(
             groupDays.set(groupKey, new Set());
           }
 
-          for (let sess = 0; sess < sessionsNeeded; sess++) {
-            // Find least-loaded day for this semester
-            const bestDay = findLeastLoadedDayForSemester(batch.semester);
-            if (!bestDay) break;
-
-            // Try to find an available slot on this day
-            let scheduled = false;
-            for (const timeSlot of timeSlots) {
-              if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
+          let scheduledCount = 0;
+          // PRIORITIZE EARLY SLOTS: Loop through time slots first, then days
+          // This fills early morning slots across all days before moving to afternoon
+          for (const timeSlot of timeSlots) {
+            if (scheduledCount >= sessionsNeeded) break;
+            if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
+            
+            for (const day of WORKING_DAYS) {
+              if (scheduledCount >= sessionsNeeded) break;
               
-              const slotKey = `${bestDay}-${timeSlot.id}`;
+              const slotKey = `${day}-${timeSlot.id}`;
               const batchSemKey = `${batch.id}-${batch.semester}`;
               
-              // STRICT CHECK: No class in this SEMESTER can use this time slot (prevents any batch from using it)
+              // STRICT CHECK: No class in this SEMESTER can use this time slot
               if (semesterTimeSlots.get(batch.semester)?.has(slotKey)) continue;
               
               // STRICT CHECK: This batch+semester cannot have ANY class (theory or lab) at this time
@@ -519,7 +519,7 @@ export async function registerRoutes(
                 batchId: batch.id,
                 classroomId: availableRoom.id,
                 timeSlotId: timeSlot.id,
-                day: bestDay,
+                day: day,
                 labGroup: null,
                 hasConflict: false,
                 conflictType: null,
@@ -528,8 +528,8 @@ export async function registerRoutes(
               teacherSlots.get(teacher.id)?.add(slotKey);
               roomSlots.get(availableRoom.id)?.add(slotKey);
               batchSlots.get(batch.id)?.add(slotKey);
-              groupDays.get(groupKey)?.add(bestDay);
-              batchTheoryDays.get(batch.id)?.add(bestDay);
+              groupDays.get(groupKey)?.add(day);
+              batchTheoryDays.get(batch.id)?.add(day);
               
               // STRICT: Mark this batch-semester-time combo as occupied
               if (!batchSemesterTimeSlots.has(batchSemKey)) batchSemesterTimeSlots.set(batchSemKey, new Set());
@@ -538,14 +538,12 @@ export async function registerRoutes(
               // STRICT: Mark this time slot as occupied for entire semester
               semesterTimeSlots.get(batch.semester)?.add(slotKey);
               
-              daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 1);
-              const semKey = `${batch.semester}-${bestDay}`;
+              daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 1);
+              const semKey = `${batch.semester}-${day}`;
               semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 1);
 
-              scheduled = true;
-              break;
+              scheduledCount++;
             }
-            if (!scheduled) break;
           }
         }
       }
