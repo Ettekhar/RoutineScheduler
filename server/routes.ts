@@ -364,6 +364,7 @@ export async function registerRoutes(
       const batchTheoryDays = new Map<string, Set<string>>(); // Track which days batch uses for theory
       const batchLabDays = new Map<string, Set<string>>(); // Track which days batch uses for labs
       const batchSemesterLabTimeSlots = new Map<string, Set<string>>(); // Track time slot IDs used by labs for each batch-semester
+      const semesterDaySlotCounts = new Map<string, number>(); // Track classes per day per semester
 
       teachers.forEach(t => teacherSlots.set(t.id, new Set()));
       classrooms.forEach(r => roomSlots.set(r.id, new Set()));
@@ -373,6 +374,20 @@ export async function registerRoutes(
         batchLabDays.set(b.id, new Set());
       });
       WORKING_DAYS.forEach(d => daySlotCounts.set(d, 0));
+      
+      // Pre-calculate total weekly classes per semester
+      const semesterWeeklyCounts = new Map<number, number>();
+      courses.forEach(course => {
+        const current = semesterWeeklyCounts.get(course.semester) || 0;
+        semesterWeeklyCounts.set(course.semester, current + course.sessionsPerWeek);
+      });
+      
+      // Calculate target distribution per day per semester
+      const semesterDayTargets = new Map<number, number>();
+      semesterWeeklyCounts.forEach((count, sem) => {
+        const target = Math.ceil(count / 5); // Spread across 5 days
+        semesterDayTargets.set(sem, target);
+      });
 
       // Assign teachers to courses (round-robin)
       const courseTeachers = new Map<string, Teacher>();
@@ -403,6 +418,27 @@ export async function registerRoutes(
         });
       });
 
+      // Find least-loaded day with semester-aware distribution
+      const findLeastLoadedDayForSemester = (semester: number, excludeDays?: Set<string>): WorkingDay | null => {
+        let bestDay: WorkingDay | null = null;
+        let bestScore = Infinity;
+        const target = semesterDayTargets.get(semester) || 10;
+        
+        for (const day of WORKING_DAYS) {
+          if (excludeDays?.has(day)) continue;
+          const key = `${semester}-${day}`;
+          const count = semesterDaySlotCounts.get(key) || 0;
+          
+          // Prefer days below target, penalize days above target
+          const score = Math.abs(count - target);
+          if (score < bestScore) {
+            bestDay = day;
+            bestScore = score;
+          }
+        }
+        return bestDay;
+      };
+      
       // Find least-loaded day (compact distribution - no AM/PM separation)
       const findLeastLoadedDay = (excludeDays?: Set<string>): WorkingDay | null => {
         let minDay: WorkingDay | null = null;
@@ -442,9 +478,8 @@ export async function registerRoutes(
           }
 
           for (let sess = 0; sess < sessionsNeeded; sess++) {
-            // Find least-loaded day (excludes days already used for theory)
-            const excludeDaysSet = new Set(batchTheoryDays.get(batch.id) || new Set());
-            const bestDay = findLeastLoadedDay(excludeDaysSet);
+            // Find least-loaded day for this semester
+            const bestDay = findLeastLoadedDayForSemester(batch.semester);
             if (!bestDay) break;
 
             // Try to find an available slot on this day
@@ -484,6 +519,8 @@ export async function registerRoutes(
               batchTheoryDays.get(batch.id)?.add(bestDay);
               
               daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 1);
+              const semKey = `${batch.semester}-${bestDay}`;
+              semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 1);
 
               scheduled = true;
               break;
@@ -527,16 +564,14 @@ export async function registerRoutes(
               }
 
               for (let sess = 0; sess < sessionsNeeded; sess++) {
-                // Find least-loaded day excluding other group's days AND theory days
+                // Find least-loaded day for this semester
                 const excludeDaysSet = new Set<string>();
                 if (group === "B") {
                   for (const d of usedGroupDays.A) excludeDaysSet.add(d);
                 }
                 for (const d of usedGroupDays[group]) excludeDaysSet.add(d);
-                // Also try to exclude days with theory classes
-                for (const d of (batchTheoryDays.get(batch.id) || new Set())) excludeDaysSet.add(d);
 
-                const bestDay = findLeastLoadedDay(excludeDaysSet);
+                const bestDay = findLeastLoadedDayForSemester(batch.semester, excludeDaysSet);
                 if (!bestDay) break;
 
                 // Find 2 consecutive time slots NOT already used by other labs for this batch-semester
@@ -597,6 +632,8 @@ export async function registerRoutes(
                   batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
                   
                   daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
+                  const semKey = `${batch.semester}-${bestDay}`;
+                  semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 2);
                   
                   scheduled = true;
                   break;
@@ -618,10 +655,8 @@ export async function registerRoutes(
             for (let sess = 0; sess < sessionsNeeded; sess++) {
               const excludeDaysSet = new Set<string>();
               for (const d of usedDays) excludeDaysSet.add(d);
-              // Also try to exclude days with theory classes
-              for (const d of (batchTheoryDays.get(batch.id) || new Set())) excludeDaysSet.add(d);
 
-              const bestDay = findLeastLoadedDay(excludeDaysSet);
+              const bestDay = findLeastLoadedDayForSemester(batch.semester, excludeDaysSet);
               if (!bestDay) break;
 
               let scheduled = false;
@@ -680,6 +715,8 @@ export async function registerRoutes(
                 batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
                 
                 daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
+                const semKey = `${batch.semester}-${bestDay}`;
+                semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 2);
                 
                 scheduled = true;
                 break;
