@@ -523,9 +523,6 @@ export async function registerRoutes(
               const slotKey = `${day}-${timeSlot.id}`;
               const batchSemKey = `${batch.id}-${batch.semester}`;
               
-              // STRICT CHECK: No class in this SEMESTER can use this time slot
-              if (semesterTimeSlots.get(batch.semester)?.has(slotKey)) continue;
-              
               // STRICT CHECK: This batch+semester cannot have ANY class (theory or lab) at this time
               if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey)) continue;
               if (teacherSlots.get(teacher.id)?.has(slotKey) || batchSlots.get(batch.id)?.has(slotKey)) continue;
@@ -560,9 +557,6 @@ export async function registerRoutes(
               // STRICT: Mark this batch-semester-time combo as occupied
               if (!batchSemesterTimeSlots.has(batchSemKey)) batchSemesterTimeSlots.set(batchSemKey, new Set());
               batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey);
-              
-              // STRICT: Mark this time slot as occupied for entire semester
-              semesterTimeSlots.get(batch.semester)?.add(slotKey);
               
               daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 1);
               const semKey = `${batch.semester}-${day}`;
@@ -653,9 +647,6 @@ export async function registerRoutes(
                   const slotKey1 = `${day}-${slot1.id}`;
                   const slotKey2 = `${day}-${slot2.id}`;
 
-                  // STRICT CHECK: No class in this SEMESTER can use these time slots
-                  if (semesterTimeSlots.get(batch.semester)?.has(slotKey1) || semesterTimeSlots.get(batch.semester)?.has(slotKey2)) continue;
-                  
                   // STRICT CHECK: Cannot use if batch-semester already has class at this time (theory or lab)
                   if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) || batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)) continue;
                   if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
@@ -705,10 +696,6 @@ export async function registerRoutes(
                   }
                   batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey1);
                   batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey2);
-                  
-                  // STRICT: Mark these times as occupied for entire semester
-                  semesterTimeSlots.get(batch.semester)?.add(slotKey1);
-                  semesterTimeSlots.get(batch.semester)?.add(slotKey2);
                   
                   daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 2);
                   const semKey = `${batch.semester}-${day}`;
@@ -764,9 +751,6 @@ export async function registerRoutes(
                 const slotKey1 = `${day}-${slot1.id}`;
                 const slotKey2 = `${day}-${slot2.id}`;
 
-                // STRICT CHECK: No class in this SEMESTER can use these time slots
-                if (semesterTimeSlots.get(batch.semester)?.has(slotKey1) || semesterTimeSlots.get(batch.semester)?.has(slotKey2)) continue;
-                
                 // STRICT CHECK: Cannot use if batch-semester already has class at this time (theory or lab)
                 if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) || batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)) continue;
                 if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
@@ -816,10 +800,6 @@ export async function registerRoutes(
                 }
                 batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey1);
                 batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey2);
-                
-                // STRICT: Mark these times as occupied for entire semester
-                semesterTimeSlots.get(batch.semester)?.add(slotKey1);
-                semesterTimeSlots.get(batch.semester)?.add(slotKey2);
                 
                 daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 2);
                 const semKey = `${batch.semester}-${day}`;
