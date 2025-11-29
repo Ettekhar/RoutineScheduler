@@ -51,6 +51,10 @@ export default function Dashboard() {
     queryKey: ["/api/stats"],
   });
 
+  const { data: lunchBreak } = useQuery({
+    queryKey: ["/api/lunch-break"],
+  });
+
   const generateMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("POST", "/api/schedule/generate");

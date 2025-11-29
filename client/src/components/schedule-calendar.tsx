@@ -22,7 +22,13 @@ interface ScheduleCalendarProps {
   onEditEntry: (entry: ScheduleEntryWithDetails) => void;
   onDragEntry?: (entryId: string, newDay: WorkingDay, newSlotId: string) => void;
   isLoading?: boolean;
+  lunchBreak?: { startTime: string; endTime: string; enabled: boolean };
 }
+
+const isLunchTime = (startTime: string, endTime: string, lunch?: { startTime: string; endTime: string; enabled: boolean }) => {
+  if (!lunch || !lunch.enabled) return false;
+  return startTime === lunch.startTime && endTime === lunch.endTime;
+};
 
 const DAY_LABELS: Record<WorkingDay, string> = {
   sunday: "Sun",
@@ -46,6 +52,7 @@ export function ScheduleCalendar({
   onEditEntry,
   onDragEntry,
   isLoading,
+  lunchBreak,
 }: ScheduleCalendarProps) {
   const [dragOverCell, setDragOverCell] = useState<string | null>(null);
 
@@ -181,6 +188,7 @@ export function ScheduleCalendar({
                 const cellKey = `${day}-slot-${slot.slotNumber}`;
                 const slotEntries = entriesByDayAndSlot[`${day}-slot-${slot.slotNumber}`] || [];
                 const isDragOver = dragOverCell === cellKey;
+                const isLunch = isLunchTime(slot.startTime, slot.endTime, lunchBreak);
 
                 return (
                   <div
@@ -188,23 +196,28 @@ export function ScheduleCalendar({
                     className={cn(
                       "flex-1 min-w-[100px] min-h-[90px] p-1 border-r transition-colors",
                       isDragOver && "bg-accent/50",
-                      slotEntries.length === 0 && "bg-background"
+                      isLunch && "bg-orange-100/50 dark:bg-orange-950/30",
+                      slotEntries.length === 0 && !isLunch && "bg-background"
                     )}
                     onDragOver={(e) => handleDragOver(e, cellKey)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, day, `slot-${slot.slotNumber}`)}
                     data-testid={`cell-${day}-${slot.slotNumber}`}
                   >
-                    <div className="flex flex-col gap-1 h-full">
-                      {slotEntries.map((entry) => (
-                        <ClassBlock
-                          key={entry.id}
-                          entry={entry}
-                          onClick={() => onEditEntry(entry)}
-                          onDragStart={(e) => handleDragStart(e, entry.id)}
-                          draggable
-                        />
-                      ))}
+                    <div className="flex flex-col gap-1 h-full items-center justify-center">
+                      {isLunch ? (
+                        <span className="text-xs font-medium text-muted-foreground">Lunch Break</span>
+                      ) : (
+                        slotEntries.map((entry) => (
+                          <ClassBlock
+                            key={entry.id}
+                            entry={entry}
+                            onClick={() => onEditEntry(entry)}
+                            onDragStart={(e) => handleDragStart(e, entry.id)}
+                            draggable
+                          />
+                        ))
+                      )}
                     </div>
                   </div>
                 );

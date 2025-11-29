@@ -46,6 +46,10 @@ export default function Schedule() {
     queryKey: ["/api/schedule"],
   });
 
+  const { data: lunchBreak } = useQuery({
+    queryKey: ["/api/lunch-break"],
+  });
+
   const updateEntryMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       return apiRequest("PATCH", `/api/schedule/${id}`, data);
@@ -177,6 +181,7 @@ export default function Schedule() {
           onEditEntry={handleEditEntry}
           onDragEntry={handleDragEntry}
           isLoading={isLoading}
+          lunchBreak={lunchBreak}
         />
       </div>
 
