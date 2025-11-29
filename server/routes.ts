@@ -612,7 +612,7 @@ export async function registerRoutes(
               const usedLabTimeSlots = batchSemesterLabTimeSlots.get(batchSemKey) || new Set();
               
               // Loop through time slot PAIRS first (earliest to latest), then days
-              // ONLY MORNING SLOTS: Skip afternoon slots after lunch
+              // PRIORITY: Morning slots first, then afternoon slots if needed
               for (let i = 0; i < timeSlots.length - 1; i++) {
                 if (scheduledCount >= sessionsNeeded) break;
                 
@@ -620,11 +620,6 @@ export async function registerRoutes(
                 const slot2 = timeSlots[i + 1];
                 if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
                     isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
-
-                // Only schedule lab pairs that start before lunch
-                const slot1StartMinutes = timeToMinutes(slot1.startTime);
-                const lunchStartMinutes = timeToMinutes(lunchBreak.startTime);
-                if (slot1StartMinutes >= lunchStartMinutes) continue; // Skip afternoon slots, but keep checking earlier pairs
 
                 // Skip if these time slots already have labs for this batch-semester
                 if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
@@ -720,7 +715,7 @@ export async function registerRoutes(
             
             let scheduledCount = 0;
             // Loop through time slot PAIRS first (earliest to latest), then days
-            // ONLY MORNING SLOTS: Skip afternoon slots after lunch
+            // PRIORITY: Morning slots first, then afternoon slots if needed
             for (let i = 0; i < timeSlots.length - 1; i++) {
               if (scheduledCount >= sessionsNeeded) break;
               
@@ -728,11 +723,6 @@ export async function registerRoutes(
               const slot2 = timeSlots[i + 1];
               if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
                   isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
-
-              // Only schedule lab pairs that start before lunch
-              const slot1StartMinutes = timeToMinutes(slot1.startTime);
-              const lunchStartMinutes = timeToMinutes(lunchBreak.startTime);
-              if (slot1StartMinutes >= lunchStartMinutes) continue; // Skip afternoon slots, but keep checking earlier pairs
 
               // Skip if these time slots already have labs for this batch-semester
               if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
