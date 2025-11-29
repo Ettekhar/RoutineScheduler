@@ -101,6 +101,11 @@ export function FilterSidebar({
   ).length;
 
   const semesters = Array.from(new Set(batches.map(b => b.semester))).sort();
+  
+  // Filter courses based on selected semester
+  const filteredCourses = filters.semester 
+    ? courses.filter(c => c.semester === filters.semester)
+    : courses;
 
   if (isCollapsed) {
     return (
@@ -298,7 +303,12 @@ export function FilterSidebar({
           >
             <Select
               value={filters.semester?.toString() || "all"}
-              onValueChange={(val) => updateFilter("semester", val === "all" ? undefined : parseInt(val))}
+              onValueChange={(val) => {
+                // When semester changes, clear course filter since courses are semester-specific
+                const newFilters = { ...filters, courseId: undefined };
+                newFilters.semester = val === "all" ? undefined : parseInt(val);
+                onFiltersChange(newFilters);
+              }}
             >
               <SelectTrigger data-testid="select-filter-semester">
                 <SelectValue placeholder="All Semesters" />
@@ -326,11 +336,11 @@ export function FilterSidebar({
               onValueChange={(val) => updateFilter("courseId", val === "all" ? undefined : val)}
             >
               <SelectTrigger data-testid="select-filter-course">
-                <SelectValue placeholder="All Courses" />
+                <SelectValue placeholder={filters.semester ? `Courses in Semester ${filters.semester}` : "All Courses"} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Courses</SelectItem>
-                {courses.map((course) => (
+                <SelectItem value="all">{filters.semester ? "All Courses" : "All Courses"}</SelectItem>
+                {filteredCourses.map((course) => (
                   <SelectItem key={course.id} value={course.id}>
                     {course.code} - {course.name}
                   </SelectItem>
