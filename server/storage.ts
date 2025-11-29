@@ -79,6 +79,7 @@ export interface IStorage {
   getCurrentSession(): Promise<string>;
   setCurrentSession(sessionName: string): Promise<string>;
   addSession(sessionName: string): Promise<{ id: string; name: string }>;
+  clearScheduleForSession(sessionName: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -394,6 +395,25 @@ export class MemStorage implements IStorage {
       teacher.currentLoad = 0;
     }
     this.scheduleEntries.clear();
+  }
+
+  async clearScheduleForSession(sessionName: string): Promise<void> {
+    const entries = Array.from(this.scheduleEntries.values()).filter(e => e.session === sessionName);
+    
+    // Reduce teacher loads for entries being deleted
+    for (const entry of entries) {
+      const teacher = await this.getTeacher(entry.teacherId);
+      if (teacher) {
+        await this.updateTeacher(teacher.id, { 
+          currentLoad: Math.max(0, teacher.currentLoad - 1) 
+        } as any);
+      }
+    }
+    
+    // Delete entries for this session
+    for (const entry of entries) {
+      this.scheduleEntries.delete(entry.id);
+    }
   }
 
   // Stats

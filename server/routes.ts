@@ -285,8 +285,13 @@ export async function registerRoutes(
   });
 
   app.delete("/api/schedule", async (req, res) => {
-    await storage.clearSchedule();
-    res.status(204).send();
+    try {
+      const currentSession = await storage.getCurrentSession();
+      await storage.clearScheduleForSession(currentSession);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   });
 
   // Helper function to find consecutive available slots for labs
