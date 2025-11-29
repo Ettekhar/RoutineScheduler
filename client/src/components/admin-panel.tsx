@@ -125,6 +125,7 @@ export function AdminPanel({
   const [newSessionName, setNewSessionName] = useState("");
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingSessionName, setEditingSessionName] = useState("");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   return (
     <div className="h-full flex flex-col" data-testid="admin-panel">
@@ -250,7 +251,13 @@ export function AdminPanel({
                             </Button>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Dialog>
+                            <Dialog open={editDialogOpen && editingSessionId === session.id} onOpenChange={(open) => {
+                              if (!open) {
+                                setEditDialogOpen(false);
+                                setEditingSessionId(null);
+                                setEditingSessionName("");
+                              }
+                            }}>
                               <DialogTrigger asChild>
                                 <Button
                                   size="icon"
@@ -258,6 +265,7 @@ export function AdminPanel({
                                   onClick={() => {
                                     setEditingSessionId(session.id);
                                     setEditingSessionName(session.name);
+                                    setEditDialogOpen(true);
                                   }}
                                   data-testid={`button-edit-session-${session.id}`}
                                 >
@@ -267,6 +275,7 @@ export function AdminPanel({
                               <DialogContent>
                                 <DialogHeader>
                                   <DialogTitle>Edit Session</DialogTitle>
+                                  <DialogDescription>Update the session name</DialogDescription>
                                 </DialogHeader>
                                 <div className="space-y-3">
                                   <Input
@@ -276,13 +285,18 @@ export function AdminPanel({
                                     data-testid="input-edit-session-name"
                                   />
                                   <div className="flex gap-2 justify-end">
-                                    <Button variant="outline" onClick={() => setEditingSessionId(null)}>
+                                    <Button variant="outline" onClick={() => {
+                                      setEditDialogOpen(false);
+                                      setEditingSessionId(null);
+                                      setEditingSessionName("");
+                                    }}>
                                       Cancel
                                     </Button>
                                     <Button
                                       onClick={() => {
                                         if (editingSessionName.trim()) {
                                           onUpdateSession?.(editingSessionId!, editingSessionName.trim());
+                                          setEditDialogOpen(false);
                                           setEditingSessionId(null);
                                           setEditingSessionName("");
                                         }
@@ -310,14 +324,17 @@ export function AdminPanel({
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Session</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to delete "{session.name}"? All schedules for this session will be deleted.
+                                    Are you sure you want to delete "{session.name}"? All schedules for this session will be deleted. This action cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
                                   <AlertDialogAction 
-                                    onClick={() => onDeleteSession?.(session.id)}
+                                    onClick={() => {
+                                      onDeleteSession?.(session.id);
+                                    }}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    data-testid="button-confirm-delete"
                                   >
                                     Delete
                                   </AlertDialogAction>
