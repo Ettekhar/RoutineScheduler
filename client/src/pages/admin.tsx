@@ -14,6 +14,10 @@ import { z } from "zod";
 export default function Admin() {
   const { toast } = useToast();
 
+  const { data: sessionsData } = useQuery({
+    queryKey: ["/api/sessions"],
+  });
+
   const { data: teachers = [], isLoading: teachersLoading } = useQuery<Teacher[]>({
     queryKey: ["/api/teachers"],
   });
@@ -184,12 +188,26 @@ export default function Admin() {
     },
   });
 
+  const setSessionMutation = useMutation({
+    mutationFn: (sessionName: string) => apiRequest("POST", "/api/sessions/set", { sessionName }),
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
+      toast({ title: "Session Changed", description: `Current session: ${data.current}` });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   return (
     <AdminPanel
       teachers={teachers}
       courses={courses}
       batches={batches}
       classrooms={classrooms}
+      sessions={sessionsData?.sessions || []}
+      currentSession={sessionsData?.current || "Fall 2025"}
+      onSetSession={(session) => setSessionMutation.mutateAsync(session)}
       onAddTeacher={(data) => addTeacherMutation.mutateAsync(data)}
       onUpdateTeacher={(id, data) => updateTeacherMutation.mutateAsync({ id, data })}
       onDeleteTeacher={(id) => deleteTeacherMutation.mutateAsync(id)}

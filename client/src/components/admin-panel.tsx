@@ -48,6 +48,7 @@ import {
   MapPin,
   Loader2,
   AlertCircle,
+  Calendar,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -74,6 +75,9 @@ interface AdminPanelProps {
   courses: Course[];
   batches: Batch[];
   classrooms: Classroom[];
+  sessions?: Array<{ id: string; name: string }>;
+  currentSession?: string;
+  onSetSession?: (session: string) => Promise<void>;
   onAddTeacher: (data: z.infer<typeof insertTeacherSchema>) => Promise<void>;
   onUpdateTeacher: (id: string, data: z.infer<typeof insertTeacherSchema>) => Promise<void>;
   onDeleteTeacher: (id: string) => Promise<void>;
@@ -94,6 +98,9 @@ export function AdminPanel({
   courses,
   batches,
   classrooms,
+  sessions = [],
+  currentSession = "Fall 2025",
+  onSetSession,
   onAddTeacher,
   onUpdateTeacher,
   onDeleteTeacher,
@@ -122,6 +129,14 @@ export function AdminPanel({
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
         <div className="border-b px-4">
           <TabsList className="h-12 bg-transparent p-0 gap-6">
+            <TabsTrigger 
+              value="sessions" 
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0"
+              data-testid="tab-sessions"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Sessions
+            </TabsTrigger>
             <TabsTrigger 
               value="teachers" 
               className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0"
@@ -158,6 +173,45 @@ export function AdminPanel({
         </div>
 
         <ScrollArea className="flex-1 p-4">
+          <TabsContent value="sessions" className="mt-0">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Manage Sessions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Current Session</label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-semibold px-3 py-2 rounded bg-primary/10 text-primary">
+                        {currentSession}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Switch Session</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {sessions.map((session) => (
+                        <Button
+                          key={session.id}
+                          variant={currentSession === session.name ? "default" : "outline"}
+                          className="justify-start"
+                          onClick={() => onSetSession?.(session.name)}
+                          data-testid={`button-set-session-${session.name}`}
+                        >
+                          {session.name}
+                          {currentSession === session.name && (
+                            <span className="ml-auto text-xs font-semibold">Active</span>
+                          )}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="teachers" className="mt-0">
             <TeachersTab
               teachers={teachers}
