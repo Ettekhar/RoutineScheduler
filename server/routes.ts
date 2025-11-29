@@ -335,6 +335,12 @@ export async function registerRoutes(
     return null;
   }
 
+  // Helper function to convert time string to minutes
+  const timeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
   // Generate Schedule
   app.post("/api/schedule/generate", async (req, res) => {
     try {
