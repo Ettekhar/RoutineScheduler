@@ -289,6 +289,48 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // Helper function to find consecutive available slots for labs
+  function findConsecutiveSlots(
+    day: string,
+    groupKey: string,
+    teacher: Teacher,
+    room: Classroom,
+    timeSlots: TimeSlot[],
+    lunchBreak: LunchBreakConfig,
+    teacherSlots: Map<string, Set<string>>,
+    roomSlots: Map<string, Set<string>>,
+    groupSlots: Map<string, Set<string>>
+  ): { slot1: TimeSlot; slot2: TimeSlot } | null {
+    // Try to find 2 consecutive slots
+    for (let i = 0; i < timeSlots.length - 1; i++) {
+      const slot1 = timeSlots[i];
+      const slot2 = timeSlots[i + 1];
+      
+      // Skip if either slot is lunch time
+      if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
+          isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) {
+        continue;
+      }
+
+      const slotKey1 = `${day}-${slot1.id}`;
+      const slotKey2 = `${day}-${slot2.id}`;
+
+      // Check if both slots are available
+      const teacherFree = !teacherSlots.get(teacher.id)?.has(slotKey1) && 
+                         !teacherSlots.get(teacher.id)?.has(slotKey2);
+      const groupFree = !groupSlots.get(groupKey)?.has(slotKey1) && 
+                       !groupSlots.get(groupKey)?.has(slotKey2);
+      const roomFree = !roomSlots.get(room.id)?.has(slotKey1) && 
+                      !roomSlots.get(room.id)?.has(slotKey2);
+
+      if (teacherFree && groupFree && roomFree) {
+        return { slot1, slot2 };
+      }
+    }
+    
+    return null;
+  }
+
   // Generate Schedule
   app.post("/api/schedule/generate", async (req, res) => {
     try {
@@ -312,6 +354,7 @@ export async function registerRoutes(
       const teacherSlots = new Map<string, Set<string>>();
       const roomSlots = new Map<string, Set<string>>();
       const groupSlots = new Map<string, Set<string>>(); // For batch + group combinations
+      const groupDays = new Map<string, Set<string>>(); // Track which days each group is used
 
       teachers.forEach(t => teacherSlots.set(t.id, new Set()));
       classrooms.forEach(r => roomSlots.set(r.id, new Set()));
@@ -345,27 +388,22 @@ export async function registerRoutes(
 
           if (suitableRooms.length === 0) continue;
 
-          // If lab with >25 students, split into groups
-          const groups = needsSplit ? ["A", "B"] : [null];
-
-          for (const group of groups) {
-            const groupKey = `${batch.id}-${group || "full"}`;
+          // Handle theory classes: no grouping, schedule once for full batch
+          if (!isLab) {
+            const groupKey = `${batch.id}-full`;
             if (!groupSlots.has(groupKey)) {
               groupSlots.set(groupKey, new Set());
+              groupDays.set(groupKey, new Set());
             }
 
-            // Schedule sessions for this group
             let sessionsScheduled = 0;
-            
             for (const day of WORKING_DAYS) {
               if (sessionsScheduled >= sessionsNeeded) break;
               
-              for (let slotIdx = 0; slotIdx < timeSlots.length; slotIdx++) {
+              for (const timeSlot of timeSlots) {
                 if (sessionsScheduled >= sessionsNeeded) break;
                 
-                const timeSlot = timeSlots[slotIdx];
                 const slotKey = `${day}-${timeSlot.id}`;
-                const groupSlotKey = `${groupKey}-${slotKey}`;
 
                 // Skip lunch time slots
                 if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
@@ -395,7 +433,7 @@ export async function registerRoutes(
                   classroomId: availableRoom.id,
                   timeSlotId: timeSlot.id,
                   day,
-                  labGroup: group,
+                  labGroup: null,
                   hasConflict: false,
                   conflictType: null,
                 });
@@ -404,8 +442,140 @@ export async function registerRoutes(
                 teacherSlots.get(teacher.id)?.add(slotKey);
                 roomSlots.get(availableRoom.id)?.add(slotKey);
                 groupSlots.get(groupKey)?.add(slotKey);
+                groupDays.get(groupKey)?.add(day);
 
                 sessionsScheduled++;
+              }
+            }
+          } else if (needsSplit) {
+            // Lab classes with >25 students: split into groups
+            const groups = ["A", "B"];
+            let groupAScheduled = 0;
+            let groupBScheduled = 0;
+
+            for (const group of groups) {
+              const groupKey = `${batch.id}-${group}`;
+              if (!groupSlots.has(groupKey)) {
+                groupSlots.set(groupKey, new Set());
+                groupDays.set(groupKey, new Set());
+              }
+
+              let sessionsScheduled = 0;
+              
+              // Try to schedule on different days for each group
+              for (const day of WORKING_DAYS) {
+                if (sessionsScheduled >= sessionsNeeded) break;
+
+                // For group B, try to use different days than group A
+                if (group === "B" && groupDays.get(`${batch.id}-A`)?.has(day)) {
+                  continue;
+                }
+
+                // Find 2 consecutive slots for lab
+                let availableRoom: Classroom | undefined;
+                for (const room of suitableRooms) {
+                  const consecutive = findConsecutiveSlots(
+                    day,
+                    groupKey,
+                    teacher,
+                    room,
+                    timeSlots,
+                    lunchBreak,
+                    teacherSlots,
+                    roomSlots,
+                    groupSlots
+                  );
+
+                  if (consecutive) {
+                    availableRoom = room;
+                    const { slot1, slot2 } = consecutive;
+
+                    // Create entries for both consecutive slots
+                    for (const slot of [slot1, slot2]) {
+                      const slotKey = `${day}-${slot.id}`;
+                      
+                      await storage.createScheduleEntry({
+                        courseId: course.id,
+                        teacherId: teacher.id,
+                        batchId: batch.id,
+                        classroomId: availableRoom.id,
+                        timeSlotId: slot.id,
+                        day,
+                        labGroup: group,
+                        hasConflict: false,
+                        conflictType: null,
+                      });
+
+                      // Mark slots as occupied
+                      teacherSlots.get(teacher.id)?.add(slotKey);
+                      roomSlots.get(availableRoom.id)?.add(slotKey);
+                      groupSlots.get(groupKey)?.add(slotKey);
+                    }
+
+                    groupDays.get(groupKey)?.add(day);
+                    sessionsScheduled++;
+                    break;
+                  }
+                }
+              }
+            }
+          } else {
+            // Lab classes with <=25 students: no grouping
+            const groupKey = `${batch.id}-full`;
+            if (!groupSlots.has(groupKey)) {
+              groupSlots.set(groupKey, new Set());
+              groupDays.set(groupKey, new Set());
+            }
+
+            let sessionsScheduled = 0;
+            for (const day of WORKING_DAYS) {
+              if (sessionsScheduled >= sessionsNeeded) break;
+
+              // Find 2 consecutive slots for lab
+              let availableRoom: Classroom | undefined;
+              for (const room of suitableRooms) {
+                const consecutive = findConsecutiveSlots(
+                  day,
+                  groupKey,
+                  teacher,
+                  room,
+                  timeSlots,
+                  lunchBreak,
+                  teacherSlots,
+                  roomSlots,
+                  groupSlots
+                );
+
+                if (consecutive) {
+                  availableRoom = room;
+                  const { slot1, slot2 } = consecutive;
+
+                  // Create entries for both consecutive slots
+                  for (const slot of [slot1, slot2]) {
+                    const slotKey = `${day}-${slot.id}`;
+                    
+                    await storage.createScheduleEntry({
+                      courseId: course.id,
+                      teacherId: teacher.id,
+                      batchId: batch.id,
+                      classroomId: availableRoom.id,
+                      timeSlotId: slot.id,
+                      day,
+                      labGroup: null,
+                      hasConflict: false,
+                      conflictType: null,
+                    });
+
+                    // Mark slots as occupied
+                    teacherSlots.get(teacher.id)?.add(slotKey);
+                    roomSlots.get(availableRoom.id)?.add(slotKey);
+                    groupSlots.get(groupKey)?.add(slotKey);
+                  }
+
+                  groupDays.get(groupKey)?.add(day);
+                  sessionsScheduled++;
+                  break;
+                }
               }
             }
           }
