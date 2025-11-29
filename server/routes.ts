@@ -361,10 +361,16 @@ export async function registerRoutes(
       const batchSlots = new Map<string, Set<string>>(); // Track entire batch occupancy (blocks all students)
       const groupDays = new Map<string, Set<string>>(); // Track which days each group is used
       const daySlotCounts = new Map<string, number>(); // Track how many classes per day to balance load
+      const batchTheoryDays = new Map<string, Set<string>>(); // Track which days batch uses for theory
+      const batchLabDays = new Map<string, Set<string>>(); // Track which days batch uses for labs
 
       teachers.forEach(t => teacherSlots.set(t.id, new Set()));
       classrooms.forEach(r => roomSlots.set(r.id, new Set()));
-      batches.forEach(b => batchSlots.set(b.id, new Set()));
+      batches.forEach(b => {
+        batchSlots.set(b.id, new Set());
+        batchTheoryDays.set(b.id, new Set());
+        batchLabDays.set(b.id, new Set());
+      });
       WORKING_DAYS.forEach(d => daySlotCounts.set(d, 0));
 
       // Assign teachers to courses (round-robin)
@@ -396,30 +402,26 @@ export async function registerRoutes(
       // Round-robin slot assignment index
       let slotAssignmentIndex = 0;
 
-      // Schedule each batch's courses
+      // PHASE 1: Schedule ALL theory classes first
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
-        const batchCourses = courses.filter(c => c.semester === batch.semester);
+        const batchCourses = courses.filter(c => c.semester === batch.semester && c.courseType === "theory");
         
         for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
           const course = batchCourses[courseIdx];
           const teacher = courseTeachers.get(course.id);
           if (!teacher) continue;
 
-          const isLab = course.courseType === "lab";
-          const needsSplit = isLab && batch.studentCount > 25;
           const sessionsNeeded = course.sessionsPerWeek;
-
-          // Find suitable rooms
           const suitableRooms = classrooms.filter(r => 
-            r.roomType === course.courseType &&
-            r.capacity >= (needsSplit ? Math.ceil(batch.studentCount / 2) : batch.studentCount)
+            r.roomType === "theory" &&
+            r.capacity >= batch.studentCount
           );
 
           if (suitableRooms.length === 0) continue;
 
-          // Handle theory classes: distribute across days and hours
-          if (!isLab) {
+          // Schedule theory classes on separate days
+          {
             const groupKey = `${batch.id}-full`;
             if (!groupSlots.has(groupKey)) {
               groupSlots.set(groupKey, new Set());
@@ -427,7 +429,6 @@ export async function registerRoutes(
             }
 
             let sessionsScheduled = 0;
-            const usedDays = new Set<string>();
             
             for (let sess = 0; sess < sessionsNeeded; sess++) {
               let scheduled = false;
@@ -437,8 +438,8 @@ export async function registerRoutes(
                 const slotIdx = (slotAssignmentIndex + attempts) % availableSlots.length;
                 const slot = availableSlots[slotIdx];
                 
-                // For multiple sessions, use different days
-                if (usedDays.has(slot.day)) continue;
+                // Theory must use different day than any theory already scheduled for this batch
+                if (batchTheoryDays.get(batch.id)?.has(slot.day)) continue;
                 
                 const slotKey = `${slot.day}-${slot.timeSlotId}`;
 
@@ -474,9 +475,9 @@ export async function registerRoutes(
                 groupSlots.get(groupKey)?.add(slotKey);
                 batchSlots.get(batch.id)?.add(slotKey);
                 groupDays.get(groupKey)?.add(slot.day);
+                batchTheoryDays.get(batch.id)?.add(slot.day);
                 daySlotCounts.set(slot.day, (daySlotCounts.get(slot.day) || 0) + 1);
 
-                usedDays.add(slot.day);
                 slotAssignmentIndex = (slotIdx + 1) % availableSlots.length;
                 sessionsScheduled++;
                 scheduled = true;
@@ -484,8 +485,33 @@ export async function registerRoutes(
               
               if (!scheduled) break;
             }
-          } else if (needsSplit) {
-            // Lab classes with >25 students: split into groups
+          }
+        }
+      }
+
+      // PHASE 2: Schedule ALL lab classes on DIFFERENT days than theory
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
+        const batchCourses = courses.filter(c => c.semester === batch.semester && c.courseType === "lab");
+        
+        for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
+          const course = batchCourses[courseIdx];
+          const teacher = courseTeachers.get(course.id);
+          if (!teacher) continue;
+
+          const needsSplit = batch.studentCount > 25;
+          const sessionsNeeded = course.sessionsPerWeek;
+
+          // Find suitable rooms
+          const suitableRooms = classrooms.filter(r => 
+            r.roomType === "lab" &&
+            r.capacity >= (needsSplit ? Math.ceil(batch.studentCount / 2) : batch.studentCount)
+          );
+
+          if (suitableRooms.length === 0) continue;
+
+          if (needsSplit) {
+            // Lab classes with >25 students: split into groups A and B
             const groups = ["A", "B"];
             const usedGroupDays = { A: new Set<string>(), B: new Set<string>() };
 
@@ -504,6 +530,9 @@ export async function registerRoutes(
                 for (let attempts = 0; attempts < availableSlots.length * 2 && !scheduled; attempts++) {
                   const slotIdx = (slotAssignmentIndex + attempts) % availableSlots.length;
                   const slot = availableSlots[slotIdx];
+                  
+                  // CRITICAL: Labs cannot use days where theory is scheduled for this batch
+                  if (batchTheoryDays.get(batch.id)?.has(slot.day)) continue;
                   
                   // Group B must use different day than Group A
                   if (group === "B" && usedGroupDays.A.has(slot.day)) continue;
@@ -564,6 +593,7 @@ export async function registerRoutes(
 
                   groupDays.get(groupKey)?.add(slot.day);
                   usedGroupDays[group].add(slot.day);
+                  batchLabDays.get(batch.id)?.add(slot.day);
                   daySlotCounts.set(slot.day, (daySlotCounts.get(slot.day) || 0) + 2);
                   slotAssignmentIndex = (slotIdx + 1) % availableSlots.length;
                   sessionsScheduled++;
@@ -591,6 +621,8 @@ export async function registerRoutes(
                 const slotIdx = (slotAssignmentIndex + attempts) % availableSlots.length;
                 const slot = availableSlots[slotIdx];
                 
+                // CRITICAL: Labs cannot use days where theory is scheduled for this batch
+                if (batchTheoryDays.get(batch.id)?.has(slot.day)) continue;
                 if (usedDays.has(slot.day)) continue;
 
                 const slotIndex = timeSlots.findIndex(s => s.id === slot.timeSlotId);
@@ -644,6 +676,7 @@ export async function registerRoutes(
 
                 groupDays.get(groupKey)?.add(slot.day);
                 usedDays.add(slot.day);
+                batchLabDays.get(batch.id)?.add(slot.day);
                 daySlotCounts.set(slot.day, (daySlotCounts.get(slot.day) || 0) + 2);
                 slotAssignmentIndex = (slotIdx + 1) % availableSlots.length;
                 sessionsScheduled++;
