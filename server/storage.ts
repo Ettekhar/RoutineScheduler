@@ -384,3 +384,156 @@ export class MemStorage implements IStorage {
 }
 
 export const storage = new MemStorage();
+
+// Initialize with sample data
+export async function initializeSampleData() {
+  // Teachers
+  const teachers = [
+    await storage.createTeacher({ 
+      name: "Dr. Ahmed Hassan", 
+      designation: "Assistant Professor", 
+      department: "Computer Science",
+      maxLoad: 18 
+    }),
+    await storage.createTeacher({ 
+      name: "Prof. Sarah Khan", 
+      designation: "Associate Professor", 
+      department: "Computer Science",
+      maxLoad: 16 
+    }),
+    await storage.createTeacher({ 
+      name: "Dr. Muhammad Ali", 
+      designation: "Assistant Professor", 
+      department: "Software Engineering",
+      maxLoad: 18 
+    }),
+    await storage.createTeacher({ 
+      name: "Ms. Fatima Noor", 
+      designation: "Lecturer", 
+      department: "Computer Science",
+      maxLoad: 20 
+    }),
+    await storage.createTeacher({ 
+      name: "Dr. Usman Khan", 
+      designation: "Professor", 
+      department: "Software Engineering",
+      maxLoad: 14 
+    }),
+  ];
+
+  // Classrooms
+  const classrooms = [
+    await storage.createClassroom({ 
+      roomNumber: "CS-101", 
+      capacity: 60, 
+      roomType: "theory",
+      building: "Engineering Block A"
+    }),
+    await storage.createClassroom({ 
+      roomNumber: "CS-102", 
+      capacity: 40, 
+      roomType: "theory",
+      building: "Engineering Block A"
+    }),
+    await storage.createClassroom({ 
+      roomNumber: "CS-201", 
+      capacity: 30, 
+      roomType: "lab",
+      building: "Engineering Block B"
+    }),
+    await storage.createClassroom({ 
+      roomNumber: "CS-202", 
+      capacity: 30, 
+      roomType: "lab",
+      building: "Engineering Block B"
+    }),
+  ];
+
+  // Courses - Semester 1
+  const courses = [
+    await storage.createCourse({ 
+      code: "CS-101", 
+      name: "Introduction to Programming", 
+      semester: 1, 
+      creditHours: 3,
+      courseType: "theory",
+      sessionsPerWeek: 2
+    }),
+    await storage.createCourse({ 
+      code: "CS-102", 
+      name: "Programming Lab", 
+      semester: 1, 
+      creditHours: 1,
+      courseType: "lab",
+      sessionsPerWeek: 1
+    }),
+    // Semester 2
+    await storage.createCourse({ 
+      code: "CS-201", 
+      name: "Data Structures", 
+      semester: 2, 
+      creditHours: 3,
+      courseType: "theory",
+      sessionsPerWeek: 2
+    }),
+    await storage.createCourse({ 
+      code: "CS-202", 
+      name: "Data Structures Lab", 
+      semester: 2, 
+      creditHours: 1,
+      courseType: "lab",
+      sessionsPerWeek: 1
+    }),
+    // Semester 3
+    await storage.createCourse({ 
+      code: "SE-301", 
+      name: "Software Engineering", 
+      semester: 3, 
+      creditHours: 3,
+      courseType: "theory",
+      sessionsPerWeek: 2
+    }),
+    await storage.createCourse({ 
+      code: "CS-301", 
+      name: "Database Management", 
+      semester: 3, 
+      creditHours: 3,
+      courseType: "theory",
+      sessionsPerWeek: 2
+    }),
+  ];
+
+  // Batches
+  const batches = [
+    await storage.createBatch({ 
+      name: "CS-2024-A", 
+      semester: 1, 
+      studentCount: 45,
+      section: "A"
+    }),
+    await storage.createBatch({ 
+      name: "CS-2024-B", 
+      semester: 1, 
+      studentCount: 50,
+      section: "B"
+    }),
+    await storage.createBatch({ 
+      name: "CS-2023-A", 
+      semester: 2, 
+      studentCount: 48,
+      section: "A"
+    }),
+    await storage.createBatch({ 
+      name: "SE-2022-A", 
+      semester: 3, 
+      studentCount: 40,
+      section: "A"
+    }),
+  ];
+
+  console.log("✓ Sample data initialized:");
+  console.log(`  - ${teachers.length} teachers`);
+  console.log(`  - ${courses.length} courses`);
+  console.log(`  - ${batches.length} batches`);
+  console.log(`  - ${classrooms.length} classrooms`);
+}
