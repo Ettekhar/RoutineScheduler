@@ -335,8 +335,9 @@ export default function Dashboard() {
             </Button>
             <Button
               onClick={() => {
-                const sessionToUse = newSessionName.trim() || selectedSession;
-                if (sessionToUse) {
+                const trimmedNew = newSessionName.trim();
+                const sessionToUse = trimmedNew || selectedSession;
+                if (sessionToUse && sessionToUse.trim()) {
                   generateMutation.mutate(sessionToUse);
                 } else {
                   toast({
@@ -398,7 +399,7 @@ export default function Dashboard() {
             <Button
               variant="destructive"
               onClick={() => {
-                if (selectedSession) {
+                if (selectedSession && selectedSession.trim()) {
                   clearMutation.mutate(selectedSession);
                 } else {
                   toast({

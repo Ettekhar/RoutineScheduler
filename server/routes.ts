@@ -287,6 +287,9 @@ export async function registerRoutes(
   app.delete("/api/schedule", async (req, res) => {
     try {
       const { sessionName } = req.body || {};
+      if (sessionName && typeof sessionName !== 'string') {
+        return res.status(400).json({ message: "sessionName must be a string" });
+      }
       const session = sessionName || await storage.getCurrentSession();
       await storage.clearScheduleForSession(session);
       res.status(204).send();
@@ -352,10 +355,13 @@ export async function registerRoutes(
     try {
       // Get session from request or use current
       const { sessionName } = req.body || {};
+      if (sessionName && typeof sessionName !== 'string') {
+        return res.status(400).json({ message: "sessionName must be a string" });
+      }
       const currentSession = sessionName || await storage.getCurrentSession();
       
       // If sessionName provided, set it as current
-      if (sessionName) {
+      if (sessionName && sessionName.trim()) {
         await storage.setCurrentSession(sessionName);
       }
 
