@@ -635,7 +635,6 @@ export async function registerRoutes(
                   batchLabDays.get(batch.id)?.add(bestDay);
                   
                   // Track time slots used by labs for this batch-semester
-                  const batchSemKey = `${batch.id}-${batch.semester}`;
                   if (!batchSemesterLabTimeSlots.has(batchSemKey)) {
                     batchSemesterLabTimeSlots.set(batchSemKey, new Set());
                   }
@@ -728,7 +727,6 @@ export async function registerRoutes(
                 batchLabDays.get(batch.id)?.add(bestDay);
                 
                 // Track time slots used by labs for this batch-semester
-                const batchSemKey = `${batch.id}-${batch.semester}`;
                 if (!batchSemesterLabTimeSlots.has(batchSemKey)) {
                   batchSemesterLabTimeSlots.set(batchSemKey, new Set());
                 }
