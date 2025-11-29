@@ -630,7 +630,7 @@ export async function registerRoutes(
                 // Only schedule lab pairs that start before lunch
                 const slot1StartMinutes = timeToMinutes(slot1.startTime);
                 const lunchStartMinutes = timeToMinutes(lunchBreak.startTime);
-                if (slot1StartMinutes >= lunchStartMinutes) break; // Skip afternoon slots
+                if (slot1StartMinutes >= lunchStartMinutes) continue; // Skip afternoon slots, but keep checking earlier pairs
 
                 // Skip if these time slots already have labs for this batch-semester
                 if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
@@ -745,7 +745,7 @@ export async function registerRoutes(
               // Only schedule lab pairs that start before lunch
               const slot1StartMinutes = timeToMinutes(slot1.startTime);
               const lunchStartMinutes = timeToMinutes(lunchBreak.startTime);
-              if (slot1StartMinutes >= lunchStartMinutes) break; // Skip afternoon slots
+              if (slot1StartMinutes >= lunchStartMinutes) continue; // Skip afternoon slots, but keep checking earlier pairs
 
               // Skip if these time slots already have labs for this batch-semester
               if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
