@@ -96,6 +96,23 @@ export function ScheduleCalendar({
     return grouped;
   }, [filteredEntries]);
 
+  // Get unique semesters for each day
+  const semestersByDay = useMemo(() => {
+    const semesters: Record<WorkingDay, Set<number>> = {
+      sunday: new Set(),
+      monday: new Set(),
+      tuesday: new Set(),
+      wednesday: new Set(),
+      thursday: new Set(),
+    };
+    
+    filteredEntries.forEach((entry) => {
+      semesters[entry.day as WorkingDay].add(entry.batch.semester);
+    });
+    
+    return semesters;
+  }, [filteredEntries]);
+
   const handleDragStart = (e: React.DragEvent, entryId: string) => {
     e.dataTransfer.setData("entryId", entryId);
     e.dataTransfer.effectAllowed = "move";
@@ -169,6 +186,9 @@ export function ScheduleCalendar({
             <div className="w-20 shrink-0 p-3 border-r font-medium text-sm text-muted-foreground">
               Day
             </div>
+            <div className="w-16 shrink-0 p-3 border-r font-medium text-sm text-muted-foreground">
+              Sem
+            </div>
             {DEFAULT_TIME_SLOTS.map((slot) => {
               const isLunch = isLunchTime(slot.startTime, slot.endTime, lunchBreak);
               return (
@@ -200,6 +220,20 @@ export function ScheduleCalendar({
                   {DAY_FULL_LABELS[day]}
                 </TooltipContent>
               </Tooltip>
+
+              {/* Semester Column */}
+              <div className="w-16 shrink-0 p-3 border-r bg-muted/30 flex items-center justify-center font-medium text-sm sticky left-20 z-10">
+                <div className="flex flex-col items-center gap-1">
+                  {Array.from(semestersByDay[day]).sort((a, b) => a - b).map((sem) => (
+                    <span key={sem} className="text-xs px-1.5 py-0.5 rounded bg-primary/20 text-primary">
+                      {sem}
+                    </span>
+                  ))}
+                  {semestersByDay[day].size === 0 && (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </div>
+              </div>
 
               {/* Time Slot Cells */}
               {DEFAULT_TIME_SLOTS.map((slot) => {
