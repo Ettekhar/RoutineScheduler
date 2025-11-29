@@ -22,6 +22,10 @@ export default function Schedule() {
   const [filterCollapsed, setFilterCollapsed] = useState(false);
   const [editingEntry, setEditingEntry] = useState<ScheduleEntryWithDetails | null>(null);
 
+  const { data: sessionsData } = useQuery({
+    queryKey: ["/api/sessions"],
+  });
+
   const { data: teachers = [] } = useQuery<Teacher[]>({
     queryKey: ["/api/teachers"],
   });
@@ -161,8 +165,31 @@ export default function Schedule() {
     return null;
   };
 
+  const handleSessionChange = async (sessionName: string) => {
+    await apiRequest("POST", "/api/sessions/set", { sessionName });
+    queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
+  };
+
   return (
     <div className="flex-1 flex overflow-hidden" data-testid="schedule-page">
+      {/* Session Selector Header */}
+      {sessionsData && (
+        <div className="absolute top-4 right-4 z-50 flex items-center gap-2 bg-card p-2 rounded border">
+          <span className="text-xs font-medium text-muted-foreground">Session:</span>
+          <select
+            value={sessionsData.current || "Fall 2025"}
+            onChange={(e) => handleSessionChange(e.target.value)}
+            className="text-xs px-2 py-1 rounded border bg-background"
+            data-testid="session-selector"
+          >
+            {sessionsData.sessions?.map((s: any) => (
+              <option key={s.id} value={s.name}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <FilterSidebar
         filters={filters}
         onFiltersChange={setFilters}

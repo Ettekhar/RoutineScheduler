@@ -73,6 +73,11 @@ export interface IStorage {
   // Lunch Break
   getLunchBreak(): Promise<LunchBreakConfig>;
   setLunchBreak(config: LunchBreakConfig): Promise<LunchBreakConfig>;
+
+  // Sessions
+  getSessions(): Promise<Array<{ id: string; name: string }>>;
+  getCurrentSession(): Promise<string>;
+  setCurrentSession(sessionName: string): Promise<string>;
 }
 
 export class MemStorage implements IStorage {
@@ -84,6 +89,8 @@ export class MemStorage implements IStorage {
   private timeSlots: Map<string, TimeSlot>;
   private scheduleEntries: Map<string, ScheduleEntry>;
   private lunchBreak: LunchBreakConfig;
+  private sessions: Map<string, { id: string; name: string }>;
+  private currentSession: string;
 
   constructor() {
     this.users = new Map();
@@ -93,6 +100,8 @@ export class MemStorage implements IStorage {
     this.classrooms = new Map();
     this.timeSlots = new Map();
     this.scheduleEntries = new Map();
+    this.sessions = new Map();
+    this.currentSession = "Fall 2025";
     
     // Default lunch break: 12:00 PM - 1:00 PM
     this.lunchBreak = {
@@ -100,6 +109,13 @@ export class MemStorage implements IStorage {
       endTime: '13:00',
       enabled: true,
     };
+
+    // Initialize default sessions
+    const defaultSessions = ['Fall 2025', 'Spring 2025', 'Summer 2025'];
+    defaultSessions.forEach(name => {
+      const id = `session-${name.toLowerCase().replace(/\s/g, '-')}`;
+      this.sessions.set(id, { id, name });
+    });
 
     // Initialize default time slots
     DEFAULT_TIME_SLOTS.forEach(slot => {
@@ -403,6 +419,20 @@ export class MemStorage implements IStorage {
   async setLunchBreak(config: LunchBreakConfig): Promise<LunchBreakConfig> {
     this.lunchBreak = config;
     return this.lunchBreak;
+  }
+
+  // Sessions
+  async getSessions(): Promise<Array<{ id: string; name: string }>> {
+    return Array.from(this.sessions.values());
+  }
+
+  async getCurrentSession(): Promise<string> {
+    return this.currentSession;
+  }
+
+  async setCurrentSession(sessionName: string): Promise<string> {
+    this.currentSession = sessionName;
+    return this.currentSession;
   }
 }
 

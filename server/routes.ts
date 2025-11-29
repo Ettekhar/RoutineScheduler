@@ -855,5 +855,25 @@ export async function registerRoutes(
     }
   });
 
+  // Sessions
+  app.get("/api/sessions", async (req, res) => {
+    const sessions = await storage.getSessions();
+    const current = await storage.getCurrentSession();
+    res.json({ sessions, current });
+  });
+
+  app.post("/api/sessions/set", async (req, res) => {
+    try {
+      const { sessionName } = req.body;
+      if (!sessionName) {
+        return res.status(400).json({ message: "sessionName is required" });
+      }
+      const current = await storage.setCurrentSession(sessionName);
+      res.json({ current });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   return httpServer;
 }

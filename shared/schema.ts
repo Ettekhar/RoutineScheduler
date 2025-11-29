@@ -82,6 +82,7 @@ export const scheduleEntries = pgTable("schedule_entries", {
   labGroup: text("lab_group"), // null for theory, 'A' or 'B' for labs with split batches
   hasConflict: boolean("has_conflict").notNull().default(false),
   conflictType: text("conflict_type"), // 'teacher', 'room', 'batch'
+  session: text("session").notNull().default("Fall 2025"), // e.g., 'Fall 2025', 'Spring 2025'
 });
 
 export const insertScheduleEntrySchema = createInsertSchema(scheduleEntries).omit({ id: true });
@@ -157,3 +158,9 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Session type
+export interface Session {
+  id: string;
+  name: string; // e.g., 'Fall 2025', 'Spring 2025'
+}
