@@ -486,12 +486,19 @@ export async function registerRoutes(
 
           let scheduledCount = 0;
           // PRIORITIZE EARLY SLOTS: Loop through time slots first, then days
-          // This fills early morning slots across all days before moving to afternoon
+          // BALANCE ACROSS DAYS: Within each time slot, prefer days with fewer classes
           for (const timeSlot of timeSlots) {
             if (scheduledCount >= sessionsNeeded) break;
             if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
             
-            for (const day of WORKING_DAYS) {
+            // Sort days by class count to balance load
+            const sortedDays = [...WORKING_DAYS].sort((a, b) => {
+              const countA = daySlotCounts.get(a) || 0;
+              const countB = daySlotCounts.get(b) || 0;
+              return countA - countB;
+            });
+            
+            for (const day of sortedDays) {
               if (scheduledCount >= sessionsNeeded) break;
               
               const slotKey = `${day}-${timeSlot.id}`;
@@ -598,7 +605,14 @@ export async function registerRoutes(
                 // Skip if these time slots already have labs for this batch-semester
                 if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
 
-                for (const day of WORKING_DAYS) {
+                // Sort days by class count to balance load, prefer days group hasn't used
+                const sortedDays = [...WORKING_DAYS].sort((a, b) => {
+                  const countA = daySlotCounts.get(a) || 0;
+                  const countB = daySlotCounts.get(b) || 0;
+                  return countA - countB;
+                });
+
+                for (const day of sortedDays) {
                   if (scheduledCount >= sessionsNeeded) break;
                   
                   // Skip if group already used this day
@@ -700,7 +714,14 @@ export async function registerRoutes(
               // Skip if these time slots already have labs for this batch-semester
               if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
 
-              for (const day of WORKING_DAYS) {
+              // Sort days by class count to balance load
+              const sortedDays = [...WORKING_DAYS].sort((a, b) => {
+                const countA = daySlotCounts.get(a) || 0;
+                const countB = daySlotCounts.get(b) || 0;
+                return countA - countB;
+              });
+
+              for (const day of sortedDays) {
                 if (scheduledCount >= sessionsNeeded) break;
                 if (usedDays.has(day)) continue;
 
