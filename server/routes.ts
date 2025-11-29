@@ -394,7 +394,7 @@ export async function registerRoutes(
 
           if (suitableRooms.length === 0) continue;
 
-          // Handle theory classes: no grouping, schedule once for full batch
+          // Handle theory classes: no grouping, schedule once per day for full batch
           if (!isLab) {
             const groupKey = `${batch.id}-full`;
             if (!groupSlots.has(groupKey)) {
@@ -406,8 +406,9 @@ export async function registerRoutes(
             for (const day of WORKING_DAYS) {
               if (sessionsScheduled >= sessionsNeeded) break;
               
+              let dayScheduled = false;
               for (const timeSlot of timeSlots) {
-                if (sessionsScheduled >= sessionsNeeded) break;
+                if (dayScheduled) break; // Only 1 session per day for theory classes
                 
                 const slotKey = `${day}-${timeSlot.id}`;
 
@@ -452,6 +453,7 @@ export async function registerRoutes(
                 batchSlots.get(batch.id)?.add(slotKey);
                 groupDays.get(groupKey)?.add(day);
 
+                dayScheduled = true;
                 sessionsScheduled++;
               }
             }
