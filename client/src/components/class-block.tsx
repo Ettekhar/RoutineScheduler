@@ -41,14 +41,15 @@ export function ClassBlock({
   const blockContent = (
     <div
       className={cn(
-        "p-2 rounded-md cursor-pointer transition-all h-full min-h-[70px]",
-        "border text-white shadow-sm",
+        "p-2.5 rounded-lg cursor-pointer transition-all",
+        "border text-white shadow-sm hover:shadow-md",
         "hover-elevate active-elevate-2",
+        "flex flex-col justify-between",
         isTheory 
-          ? "bg-schedule-theory border-schedule-theory/70" 
-          : "bg-schedule-lab border-schedule-lab/70",
+          ? "bg-schedule-theory border-schedule-theory/80" 
+          : "bg-schedule-lab border-schedule-lab/80",
         hasConflict && "ring-2 ring-schedule-conflict ring-offset-1 bg-stripes",
-        compact && "min-h-0 p-1.5"
+        compact && "p-1.5"
       )}
       onClick={onClick}
       draggable={draggable}
@@ -57,14 +58,14 @@ export function ClassBlock({
     >
       {/* Conflict indicator */}
       {hasConflict && (
-        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-schedule-conflict flex items-center justify-center shadow-md">
+        <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-schedule-conflict flex items-center justify-center shadow-md border border-white">
           <AlertTriangle className="w-3 h-3 text-white" />
         </div>
       )}
 
       {/* Course code */}
       <div className={cn(
-        "font-semibold truncate",
+        "font-bold truncate leading-tight",
         compact ? "text-xs" : "text-sm"
       )}>
         {entry.course.code}
@@ -72,33 +73,33 @@ export function ClassBlock({
 
       {/* Course name (truncated) */}
       {!compact && (
-        <div className="text-xs opacity-90 truncate mb-1">
+        <div className="text-xs opacity-90 truncate leading-tight">
           {entry.course.name}
         </div>
       )}
 
       {/* Teacher name */}
       <div className={cn(
-        "flex items-center gap-1 opacity-90",
+        "flex items-center gap-1 opacity-90 mt-1",
         compact ? "text-[10px]" : "text-xs"
       )}>
         <GraduationCap className={cn("shrink-0", compact ? "w-2.5 h-2.5" : "w-3 h-3")} />
-        <span className="truncate">{entry.teacher.name}</span>
+        <span className="truncate">{entry.teacher.name.split(" ")[0]}</span>
       </div>
 
       {/* Room and batch info */}
       {!compact && (
-        <div className="flex items-center justify-between gap-2 mt-1 text-xs opacity-80">
-          <div className="flex items-center gap-1">
+        <div className="flex flex-col gap-1 mt-1.5 text-xs opacity-85">
+          <div className="flex items-center gap-1 min-w-0">
             <MapPin className="w-3 h-3 shrink-0" />
             <span className="truncate">{entry.classroom.roomNumber}</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <Users className="w-3 h-3 shrink-0" />
-            <span className="truncate">{entry.batch.name}</span>
+            <span className="truncate text-[11px]">{entry.batch.name}</span>
             {entry.labGroup && (
-              <span className="px-1 py-0.5 rounded bg-white/20 text-[10px] font-medium">
-                {entry.labGroup}
+              <span className="px-1.5 py-0.5 rounded-sm bg-white/25 text-[10px] font-medium shrink-0">
+                G{entry.labGroup}
               </span>
             )}
           </div>

@@ -169,15 +169,21 @@ export function ScheduleCalendar({
             <div className="w-20 shrink-0 p-3 border-r font-medium text-sm text-muted-foreground">
               Day
             </div>
-            {DEFAULT_TIME_SLOTS.map((slot) => (
-              <div
-                key={slot.slotNumber}
-                className="flex-1 min-w-[100px] p-3 border-r text-center font-medium text-sm text-muted-foreground"
-              >
-                <span className="block">{slot.startTime}</span>
-                <span className="block text-xs opacity-60">{slot.endTime}</span>
-              </div>
-            ))}
+            {DEFAULT_TIME_SLOTS.map((slot) => {
+              const isLunch = isLunchTime(slot.startTime, slot.endTime, lunchBreak);
+              return (
+                <div
+                  key={slot.slotNumber}
+                  className={cn(
+                    "p-2 border-r text-center font-medium text-sm text-muted-foreground",
+                    isLunch ? "min-w-[70px] flex-shrink" : "flex-1 min-w-[120px]"
+                  )}
+                >
+                  <span className="block">{slot.startTime}</span>
+                  <span className="block text-xs opacity-60">{slot.endTime}</span>
+                </div>
+              );
+            })}
           </div>
 
           {/* Day Rows */}
@@ -206,20 +212,22 @@ export function ScheduleCalendar({
                   <div
                     key={cellKey}
                     className={cn(
-                      "flex-1 min-w-[100px] min-h-[90px] p-1 border-r transition-colors",
-                      isDragOver && "bg-accent/50",
-                      isLunch && "bg-orange-100/50 dark:bg-orange-950/30",
-                      slotEntries.length === 0 && !isLunch && "bg-background"
+                      "min-h-[110px] p-2 border-r transition-colors",
+                      isLunch ? "min-w-[70px] flex-shrink" : "flex-1 min-w-[120px]",
+                      isDragOver && !isLunch && "bg-accent/50",
+                      isLunch && "bg-orange-100/50 dark:bg-orange-950/40 flex items-center justify-center"
                     )}
                     onDragOver={(e) => handleDragOver(e, cellKey)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, day, `slot-${slot.slotNumber}`)}
                     data-testid={`cell-${day}-${slot.slotNumber}`}
                   >
-                    <div className="flex flex-col gap-1 h-full items-center justify-center">
+                    <div className="flex flex-col gap-2 w-full h-full justify-start">
                       {isLunch ? (
-                        <span className="text-xs font-medium text-muted-foreground">Lunch Break</span>
-                      ) : (
+                        <div className="flex items-center justify-center h-full text-center">
+                          <span className="text-xs font-semibold text-orange-700 dark:text-orange-300">Lunch</span>
+                        </div>
+                      ) : slotEntries.length > 0 ? (
                         slotEntries.map((entry) => (
                           <ClassBlock
                             key={entry.id}
@@ -229,7 +237,7 @@ export function ScheduleCalendar({
                             draggable
                           />
                         ))
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 );
