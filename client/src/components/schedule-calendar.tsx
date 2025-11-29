@@ -25,9 +25,21 @@ interface ScheduleCalendarProps {
   lunchBreak?: { startTime: string; endTime: string; enabled: boolean };
 }
 
+const timeToMinutes = (time: string): number => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
 const isLunchTime = (startTime: string, endTime: string, lunch?: { startTime: string; endTime: string; enabled: boolean }) => {
   if (!lunch || !lunch.enabled) return false;
-  return startTime === lunch.startTime && endTime === lunch.endTime;
+  
+  const slotStart = timeToMinutes(startTime);
+  const slotEnd = timeToMinutes(endTime);
+  const lunchStart = timeToMinutes(lunch.startTime);
+  const lunchEnd = timeToMinutes(lunch.endTime);
+  
+  // Check if slot overlaps with lunch period
+  return slotStart < lunchEnd && slotEnd > lunchStart;
 };
 
 const DAY_LABELS: Record<WorkingDay, string> = {
