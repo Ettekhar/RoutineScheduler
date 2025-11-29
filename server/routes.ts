@@ -440,7 +440,7 @@ export async function registerRoutes(
       interface DayTimeSlot {
         day: WorkingDay;
         timeSlot: TimeSlot;
-        isAM: boolean; // true if 8:45-12:00, false if 12:00-15:30
+        isAM: boolean; // true if 8:45-13:15, false if 14:00-15:30 (lunch 13:15-14:00)
       }
       
       const dayTimeSlots: DayTimeSlot[] = [];
