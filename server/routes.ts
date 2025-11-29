@@ -487,9 +487,14 @@ export async function registerRoutes(
         }
       }
 
-      // PHASE 2: Schedule ALL lab classes on DIFFERENT days than theory
+      // PHASE 2: Schedule lab classes ONLY if batch has NO theory courses
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
+        
+        // Check if this batch has theory courses scheduled - if yes, SKIP all labs
+        const hasTheory = (batchTheoryDays.get(batch.id)?.size ?? 0) > 0;
+        if (hasTheory) continue; // Skip labs if theory exists
+        
         const batchCourses = courses.filter(c => c.semester === batch.semester && c.courseType === "lab");
         
         for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
