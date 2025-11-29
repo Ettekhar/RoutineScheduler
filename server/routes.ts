@@ -525,6 +525,8 @@ export async function registerRoutes(
               
               // STRICT CHECK: This batch+semester cannot have ANY class (theory or lab) at this time
               if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey)) continue;
+              // SEMESTER-LEVEL CHECK: No other batch in same semester can use this slot
+              if (semesterTimeSlots.get(batch.semester)?.has(slotKey)) continue;
               if (teacherSlots.get(teacher.id)?.has(slotKey) || batchSlots.get(batch.id)?.has(slotKey)) continue;
 
               let availableRoom: Classroom | undefined;
@@ -557,6 +559,8 @@ export async function registerRoutes(
               // STRICT: Mark this batch-semester-time combo as occupied
               if (!batchSemesterTimeSlots.has(batchSemKey)) batchSemesterTimeSlots.set(batchSemKey, new Set());
               batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey);
+              // STRICT: Mark this time slot as used for entire semester
+              semesterTimeSlots.get(batch.semester)?.add(slotKey);
               
               daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 1);
               const semKey = `${batch.semester}-${day}`;
@@ -644,6 +648,8 @@ export async function registerRoutes(
 
                   // STRICT CHECK: Cannot use if batch-semester already has class at this time (theory or lab)
                   if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) || batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)) continue;
+                  // SEMESTER-LEVEL CHECK: No other batch in same semester can use these slots
+                  if (semesterTimeSlots.get(batch.semester)?.has(slotKey1) || semesterTimeSlots.get(batch.semester)?.has(slotKey2)) continue;
                   if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
                   if (batchSlots.get(batch.id)?.has(slotKey1) || batchSlots.get(batch.id)?.has(slotKey2)) continue;
 
@@ -691,6 +697,9 @@ export async function registerRoutes(
                   }
                   batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey1);
                   batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey2);
+                  // STRICT: Mark these times as used for entire semester
+                  semesterTimeSlots.get(batch.semester)?.add(slotKey1);
+                  semesterTimeSlots.get(batch.semester)?.add(slotKey2);
                   
                   daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 2);
                   const semKey = `${batch.semester}-${day}`;
@@ -743,6 +752,8 @@ export async function registerRoutes(
 
                 // STRICT CHECK: Cannot use if batch-semester already has class at this time (theory or lab)
                 if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) || batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)) continue;
+                // SEMESTER-LEVEL CHECK: No other batch in same semester can use these slots
+                if (semesterTimeSlots.get(batch.semester)?.has(slotKey1) || semesterTimeSlots.get(batch.semester)?.has(slotKey2)) continue;
                 if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
                 if (batchSlots.get(batch.id)?.has(slotKey1) || batchSlots.get(batch.id)?.has(slotKey2)) continue;
 
@@ -790,6 +801,9 @@ export async function registerRoutes(
                 }
                 batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey1);
                 batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey2);
+                // STRICT: Mark these times as used for entire semester
+                semesterTimeSlots.get(batch.semester)?.add(slotKey1);
+                semesterTimeSlots.get(batch.semester)?.add(slotKey2);
                 
                 daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 2);
                 const semKey = `${batch.semester}-${day}`;
