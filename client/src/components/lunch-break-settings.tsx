@@ -121,8 +121,8 @@ export function LunchBreakSettings() {
         {formData.enabled && (
           <div className="rounded-lg bg-muted p-4">
             <p className="text-sm text-muted-foreground">
-              Current lunch break: <span className="font-semibold text-foreground">{formData.startTime}</span> to{" "}
-              <span className="font-semibold text-foreground">{formData.endTime}</span>
+              Current lunch break: <span className="font-semibold text-foreground">{`${String(Math.floor(parseInt(formData.startTime) % 12 || 12)).padStart(2, "0")}:${formData.startTime.split(":")[1]} ${parseInt(formData.startTime) >= 12 ? "PM" : "AM"}`}</span> to{" "}
+              <span className="font-semibold text-foreground">{`${String(Math.floor(parseInt(formData.endTime) % 12 || 12)).padStart(2, "0")}:${formData.endTime.split(":")[1]} ${parseInt(formData.endTime) >= 12 ? "PM" : "AM"}`}</span>
             </p>
           </div>
         )}

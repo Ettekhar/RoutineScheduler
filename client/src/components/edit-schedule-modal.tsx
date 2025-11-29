@@ -37,6 +37,13 @@ import type {
 } from "@shared/schema";
 import { WORKING_DAYS, DEFAULT_TIME_SLOTS } from "@shared/schema";
 
+const format24to12 = (time: string): string => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`;
+};
+
 const DAY_LABELS: Record<WorkingDay, string> = {
   sunday: "Sunday",
   monday: "Monday",
@@ -248,7 +255,7 @@ export function EditScheduleModal({
                       <SelectContent>
                         {timeSlots.map((slot) => (
                           <SelectItem key={slot.id} value={slot.id}>
-                            {slot.startTime} - {slot.endTime}
+                            {format24to12(slot.startTime)} - {format24to12(slot.endTime)}
                           </SelectItem>
                         ))}
                       </SelectContent>

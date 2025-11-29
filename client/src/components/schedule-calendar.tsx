@@ -30,6 +30,13 @@ const timeToMinutes = (time: string): number => {
   return hours * 60 + minutes;
 };
 
+const format24to12 = (time: string): string => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`;
+};
+
 const isLunchTime = (startTime: string, endTime: string, lunch?: { startTime: string; endTime: string; enabled: boolean }) => {
   if (!lunch || !lunch.enabled) return false;
   
@@ -353,8 +360,8 @@ export function ScheduleCalendar({
                     isLunch ? "min-w-[70px] flex-shrink" : "flex-1 min-w-[120px]"
                   )}
                 >
-                  <span className="block">{slot.startTime}</span>
-                  <span className="block text-xs opacity-60">{slot.endTime}</span>
+                  <span className="block">{format24to12(slot.startTime)}</span>
+                  <span className="block text-xs opacity-60">{format24to12(slot.endTime)}</span>
                 </div>
               );
             })}

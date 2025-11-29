@@ -4,6 +4,13 @@ import { useToast } from "@/hooks/use-toast";
 import type { Teacher, Batch, ScheduleEntryWithDetails, WorkingDay } from "@shared/schema";
 import { WORKING_DAYS, DEFAULT_TIME_SLOTS } from "@shared/schema";
 
+const format24to12 = (time: string): string => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`;
+};
+
 const DAY_LABELS: Record<WorkingDay, string> = {
   sunday: "Sunday",
   monday: "Monday",
@@ -212,7 +219,7 @@ function generatePDFContent(
           <tr>
             <th>Day</th>
             ${DEFAULT_TIME_SLOTS.map(slot => 
-              `<th>${slot.startTime}<br><span style="font-size:9px;opacity:0.8">${slot.endTime}</span></th>`
+              `<th>${format24to12(slot.startTime)}<br><span style="font-size:9px;opacity:0.8">${format24to12(slot.endTime)}</span></th>`
             ).join('')}
           </tr>
         </thead>

@@ -107,10 +107,10 @@ export class MemStorage implements IStorage {
     this.sessions = new Map();
     this.currentSession = "Fall 2025";
     
-    // Default lunch break: 12:00 PM - 1:00 PM
+    // Default lunch break: 1:15 PM - 2:00 PM
     this.lunchBreak = {
-      startTime: '12:00',
-      endTime: '13:00',
+      startTime: '13:15',
+      endTime: '14:00',
       enabled: true,
     };
 
