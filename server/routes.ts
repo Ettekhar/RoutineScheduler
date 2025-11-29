@@ -875,5 +875,18 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/sessions/create", async (req, res) => {
+    try {
+      const { sessionName } = req.body;
+      if (!sessionName || typeof sessionName !== 'string') {
+        return res.status(400).json({ message: "sessionName is required and must be a string" });
+      }
+      const session = await storage.addSession(sessionName);
+      res.status(201).json(session);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   return httpServer;
 }

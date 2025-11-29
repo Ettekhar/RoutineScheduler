@@ -78,6 +78,7 @@ export interface IStorage {
   getSessions(): Promise<Array<{ id: string; name: string }>>;
   getCurrentSession(): Promise<string>;
   setCurrentSession(sessionName: string): Promise<string>;
+  addSession(sessionName: string): Promise<{ id: string; name: string }>;
 }
 
 export class MemStorage implements IStorage {
@@ -433,6 +434,19 @@ export class MemStorage implements IStorage {
   async setCurrentSession(sessionName: string): Promise<string> {
     this.currentSession = sessionName;
     return this.currentSession;
+  }
+
+  async addSession(sessionName: string): Promise<{ id: string; name: string }> {
+    // Check if session already exists
+    const exists = Array.from(this.sessions.values()).some(s => s.name === sessionName);
+    if (exists) {
+      throw new Error(`Session "${sessionName}" already exists`);
+    }
+
+    const id = `session-${sessionName.toLowerCase().replace(/\s+/g, '-')}`;
+    const session = { id, name: sessionName };
+    this.sessions.set(id, session);
+    return session;
   }
 }
 

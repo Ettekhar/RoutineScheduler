@@ -78,6 +78,7 @@ interface AdminPanelProps {
   sessions?: Array<{ id: string; name: string }>;
   currentSession?: string;
   onSetSession?: (session: string) => Promise<void>;
+  onCreateSession?: (session: string) => Promise<void>;
   onAddTeacher: (data: z.infer<typeof insertTeacherSchema>) => Promise<void>;
   onUpdateTeacher: (id: string, data: z.infer<typeof insertTeacherSchema>) => Promise<void>;
   onDeleteTeacher: (id: string) => Promise<void>;
@@ -101,6 +102,7 @@ export function AdminPanel({
   sessions = [],
   currentSession = "Fall 2025",
   onSetSession,
+  onCreateSession,
   onAddTeacher,
   onUpdateTeacher,
   onDeleteTeacher,
@@ -116,6 +118,7 @@ export function AdminPanel({
   isLoading,
 }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState("teachers");
+  const [newSessionName, setNewSessionName] = useState("");
 
   return (
     <div className="h-full flex flex-col" data-testid="admin-panel">
@@ -177,35 +180,65 @@ export function AdminPanel({
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Manage Sessions</CardTitle>
+                  <CardTitle>Current Session</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Current Session</label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-semibold px-3 py-2 rounded bg-primary/10 text-primary">
-                        {currentSession}
-                      </span>
-                    </div>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold px-3 py-2 rounded bg-primary/10 text-primary">
+                      {currentSession}
+                    </span>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Switch Session</label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {sessions.map((session) => (
-                        <Button
-                          key={session.id}
-                          variant={currentSession === session.name ? "default" : "outline"}
-                          className="justify-start"
-                          onClick={() => onSetSession?.(session.name)}
-                          data-testid={`button-set-session-${session.name}`}
-                        >
-                          {session.name}
-                          {currentSession === session.name && (
-                            <span className="ml-auto text-xs font-semibold">Active</span>
-                          )}
-                        </Button>
-                      ))}
-                    </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create New Session</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="e.g., Fall 2026, Winter 2025"
+                      value={newSessionName}
+                      onChange={(e) => setNewSessionName(e.target.value)}
+                      data-testid="input-new-session-name"
+                    />
+                    <Button
+                      onClick={() => {
+                        if (newSessionName.trim()) {
+                          onCreateSession?.(newSessionName.trim());
+                          setNewSessionName("");
+                        }
+                      }}
+                      data-testid="button-create-session"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Available Sessions ({sessions.length})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {sessions.map((session) => (
+                      <Button
+                        key={session.id}
+                        variant={currentSession === session.name ? "default" : "outline"}
+                        className="justify-start"
+                        onClick={() => onSetSession?.(session.name)}
+                        data-testid={`button-set-session-${session.name}`}
+                      >
+                        {session.name}
+                        {currentSession === session.name && (
+                          <span className="ml-auto text-xs font-semibold">Active</span>
+                        )}
+                      </Button>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

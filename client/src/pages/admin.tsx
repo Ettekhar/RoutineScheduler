@@ -199,6 +199,17 @@ export default function Admin() {
     },
   });
 
+  const createSessionMutation = useMutation({
+    mutationFn: (sessionName: string) => apiRequest("POST", "/api/sessions/create", { sessionName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
+      toast({ title: "Session Created", description: "New session has been created successfully." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   return (
     <AdminPanel
       teachers={teachers}
@@ -208,6 +219,7 @@ export default function Admin() {
       sessions={sessionsData?.sessions || []}
       currentSession={sessionsData?.current || "Fall 2025"}
       onSetSession={(session) => setSessionMutation.mutateAsync(session)}
+      onCreateSession={(session) => createSessionMutation.mutateAsync(session)}
       onAddTeacher={(data) => addTeacherMutation.mutateAsync(data)}
       onUpdateTeacher={(id, data) => updateTeacherMutation.mutateAsync({ id, data })}
       onDeleteTeacher={(id) => deleteTeacherMutation.mutateAsync(id)}
