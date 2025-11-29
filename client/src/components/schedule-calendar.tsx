@@ -180,91 +180,98 @@ export function ScheduleCalendar({
           </div>
         </div>
 
-        {/* Semester Grid for each day */}
+        {/* Semester Grid with Days in front */}
         <ScrollArea className="flex-1">
-          <div className="space-y-6 p-4">
-            {WORKING_DAYS.map((day) => (
-              <div key={day} className="border rounded-lg overflow-hidden">
-                {/* Day Header */}
-                <div className="bg-muted/40 px-4 py-2 border-b font-medium text-sm">
-                  {DAY_FULL_LABELS[day]}
+          <div className="p-4">
+            <div className="border rounded-lg overflow-hidden">
+              {/* Time Slot Header Row */}
+              <div className="flex border-b">
+                <div className="w-16 shrink-0 p-2 border-r font-medium text-sm text-muted-foreground">
+                  Day
                 </div>
+                <div className="w-16 shrink-0 p-2 border-r font-medium text-sm text-muted-foreground">
+                  Sem
+                </div>
+                {DEFAULT_TIME_SLOTS.map((slot) => {
+                  const isLunch = isLunchTime(slot.startTime, slot.endTime, lunchBreak);
+                  return (
+                    <div
+                      key={slot.slotNumber}
+                      className={cn(
+                        "shrink-0 p-2 border-r text-center font-medium text-xs text-muted-foreground",
+                        isLunch ? "w-20" : "w-24"
+                      )}
+                    >
+                      {isLunch ? "Lunch" : `${slot.startTime}-${slot.endTime}`}
+                    </div>
+                  );
+                })}
+              </div>
 
-                {/* Day's TimeSlot x Semester Grid */}
-                <div className="overflow-x-auto">
-                  <div className="inline-block min-w-full">
-                    {/* Time Slot Column Headers */}
-                    <div className="flex border-b">
-                      <div className="w-16 shrink-0 p-2 border-r font-medium text-sm text-muted-foreground">
-                        Sem
+              {/* Day and Semester Rows */}
+              {WORKING_DAYS.map((day, dayIndex) => (
+                <div key={day}>
+                  {Array.from({ length: 8 }, (_, i) => i + 1).map((sem, semIndex) => (
+                    <div key={`${day}-${sem}`} className="flex border-b last:border-b-0">
+                      {/* Day Label (only for first semester) */}
+                      {semIndex === 0 ? (
+                        <div className={cn(
+                          "w-16 shrink-0 p-2 border-r font-medium text-sm text-center bg-muted/30",
+                          "row-span-8"
+                        )} style={{ gridRow: `span 8` }}>
+                          {DAY_LABELS[day]}
+                        </div>
+                      ) : (
+                        <div className="w-16 shrink-0 p-2 border-r font-medium text-sm text-center" />
+                      )}
+
+                      {/* Semester Label */}
+                      <div className="w-16 shrink-0 p-2 border-r font-medium text-sm text-center bg-muted/20">
+                        S{sem}
                       </div>
+
+                      {/* Time Slot Cells */}
                       {DEFAULT_TIME_SLOTS.map((slot) => {
+                        const cellKey = `${day}-sem-${sem}-slot-${slot.slotNumber}`;
+                        const cellEntries = entriesByDaySemanticSlot[`${day}-sem-${sem}-slot-${slot.slotNumber}`] || [];
+                        const isDragOver = dragOverCell === cellKey;
                         const isLunch = isLunchTime(slot.startTime, slot.endTime, lunchBreak);
+
                         return (
                           <div
-                            key={slot.slotNumber}
+                            key={cellKey}
                             className={cn(
-                              "shrink-0 p-2 border-r text-center font-medium text-xs text-muted-foreground",
-                              isLunch ? "w-20" : "w-24"
+                              "shrink-0 min-h-[70px] p-1.5 border-r transition-colors",
+                              isLunch ? "w-20" : "w-24",
+                              isDragOver && !isLunch && "bg-accent/50",
+                              isLunch && "bg-orange-100/50 dark:bg-orange-950/40 flex items-center justify-center"
                             )}
+                            onDragOver={(e) => handleDragOver(e, cellKey)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, day, `slot-${slot.slotNumber}`)}
+                            data-testid={`cell-${day}-sem-${sem}-${slot.slotNumber}`}
                           >
-                            {isLunch ? "Lunch" : `${slot.startTime}-${slot.endTime}`}
+                            <div className="flex flex-col gap-0.5 w-full h-full justify-start">
+                              {!isLunch && cellEntries.length > 0 && (
+                                cellEntries.map((entry) => (
+                                  <ClassBlock
+                                    key={entry.id}
+                                    entry={entry}
+                                    onClick={() => onEditEntry(entry)}
+                                    onDragStart={(e) => handleDragStart(e, entry.id)}
+                                    draggable
+                                  />
+                                ))
+                              )}
+                            </div>
                           </div>
                         );
                       })}
                     </div>
-
-                    {/* Semester Rows */}
-                    {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => (
-                      <div key={sem} className="flex border-b last:border-b-0">
-                        {/* Semester Label */}
-                        <div className="w-16 shrink-0 p-2 border-r font-medium text-sm text-center bg-muted/20">
-                          S{sem}
-                        </div>
-
-                        {/* Time Slot Cells */}
-                        {DEFAULT_TIME_SLOTS.map((slot) => {
-                          const cellKey = `${day}-sem-${sem}-slot-${slot.slotNumber}`;
-                          const cellEntries = entriesByDaySemanticSlot[`${day}-sem-${sem}-slot-${slot.slotNumber}`] || [];
-                          const isDragOver = dragOverCell === cellKey;
-                          const isLunch = isLunchTime(slot.startTime, slot.endTime, lunchBreak);
-
-                          return (
-                            <div
-                              key={cellKey}
-                              className={cn(
-                                "shrink-0 min-h-[70px] p-1.5 border-r transition-colors",
-                                isLunch ? "w-20" : "w-24",
-                                isDragOver && !isLunch && "bg-accent/50",
-                                isLunch && "bg-orange-100/50 dark:bg-orange-950/40 flex items-center justify-center"
-                              )}
-                              onDragOver={(e) => handleDragOver(e, cellKey)}
-                              onDragLeave={handleDragLeave}
-                              onDrop={(e) => handleDrop(e, day, `slot-${slot.slotNumber}`)}
-                              data-testid={`cell-${day}-sem-${sem}-${slot.slotNumber}`}
-                            >
-                              <div className="flex flex-col gap-0.5 w-full h-full justify-start">
-                                {!isLunch && cellEntries.length > 0 && (
-                                  cellEntries.map((entry) => (
-                                    <ClassBlock
-                                      key={entry.id}
-                                      entry={entry}
-                                      onClick={() => onEditEntry(entry)}
-                                      onDragStart={(e) => handleDragStart(e, entry.id)}
-                                      draggable
-                                    />
-                                  ))
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
