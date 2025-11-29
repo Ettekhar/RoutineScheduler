@@ -540,6 +540,9 @@ export async function initializeSampleData() {
     await storage.createCourse({ code: "CSE4803", name: "Technical Writing & Presentation", semester: 8, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
     await storage.createCourse({ code: "CSE4804", name: "Data Warehousing & Data Mining", semester: 8, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
     await storage.createCourse({ code: "CSE4805", name: "IT Entrepreneurship", semester: 8, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4806", name: "Advanced Topics in Computer Science", semester: 8, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4807L", name: "Capstone Project Lab", semester: 8, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4808", name: "Research Methodology & Ethics", semester: 8, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
   ];
 
   // YOUR 9 EXACT BATCHES
