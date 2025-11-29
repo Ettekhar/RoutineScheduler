@@ -365,6 +365,7 @@ export async function registerRoutes(
       const batchLabDays = new Map<string, Set<string>>(); // Track which days batch uses for labs
       const batchSemesterLabTimeSlots = new Map<string, Set<string>>(); // Track time slot IDs used by labs for each batch-semester
       const semesterDaySlotCounts = new Map<string, number>(); // Track classes per day per semester
+      const batchSemesterTimeSlots = new Map<string, Set<string>>(); // STRICT: Track day-time slots used by batch-semester (theory OR lab, not both)
 
       teachers.forEach(t => teacherSlots.set(t.id, new Set()));
       classrooms.forEach(r => roomSlots.set(r.id, new Set()));
@@ -488,7 +489,10 @@ export async function registerRoutes(
               if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
               
               const slotKey = `${bestDay}-${timeSlot.id}`;
+              const batchSemKey = `${batch.id}-${batch.semester}`;
               
+              // STRICT CHECK: This batch+semester cannot have ANY class (theory or lab) at this time
+              if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey)) continue;
               if (teacherSlots.get(teacher.id)?.has(slotKey) || batchSlots.get(batch.id)?.has(slotKey)) continue;
 
               let availableRoom: Classroom | undefined;
@@ -517,6 +521,10 @@ export async function registerRoutes(
               batchSlots.get(batch.id)?.add(slotKey);
               groupDays.get(groupKey)?.add(bestDay);
               batchTheoryDays.get(batch.id)?.add(bestDay);
+              
+              // STRICT: Mark this batch-semester-time combo as occupied
+              if (!batchSemesterTimeSlots.has(batchSemKey)) batchSemesterTimeSlots.set(batchSemKey, new Set());
+              batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey);
               
               daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 1);
               const semKey = `${batch.semester}-${bestDay}`;
@@ -576,6 +584,7 @@ export async function registerRoutes(
 
                 // Find 2 consecutive time slots NOT already used by other labs for this batch-semester
                 const usedLabTimeSlots = batchSemesterLabTimeSlots.get(`${batch.id}-${batch.semester}`) || new Set();
+                const batchSemKey = `${batch.id}-${batch.semester}`;
                 let scheduled = false;
                 for (let i = 0; i < timeSlots.length - 1; i++) {
                   const slot1 = timeSlots[i];
@@ -589,6 +598,8 @@ export async function registerRoutes(
                   const slotKey1 = `${bestDay}-${slot1.id}`;
                   const slotKey2 = `${bestDay}-${slot2.id}`;
 
+                  // STRICT CHECK: Cannot use if batch-semester already has class at this time (theory or lab)
+                  if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) || batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)) continue;
                   if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
                   if (batchSlots.get(batch.id)?.has(slotKey1) || batchSlots.get(batch.id)?.has(slotKey2)) continue;
 
@@ -631,6 +642,10 @@ export async function registerRoutes(
                   batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot1.id);
                   batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
                   
+                  // STRICT: Mark these times as occupied for this batch-semester
+                  batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey1);
+                  batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey2);
+                  
                   daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
                   const semKey = `${batch.semester}-${bestDay}`;
                   semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 2);
@@ -651,6 +666,7 @@ export async function registerRoutes(
 
             const usedDays = new Set<string>();
             const usedLabTimeSlots = batchSemesterLabTimeSlots.get(`${batch.id}-${batch.semester}`) || new Set();
+            const batchSemKey = `${batch.id}-${batch.semester}`;
             
             for (let sess = 0; sess < sessionsNeeded; sess++) {
               const excludeDaysSet = new Set<string>();
@@ -672,6 +688,8 @@ export async function registerRoutes(
                 const slotKey1 = `${bestDay}-${slot1.id}`;
                 const slotKey2 = `${bestDay}-${slot2.id}`;
 
+                // STRICT CHECK: Cannot use if batch-semester already has class at this time (theory or lab)
+                if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) || batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)) continue;
                 if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
                 if (batchSlots.get(batch.id)?.has(slotKey1) || batchSlots.get(batch.id)?.has(slotKey2)) continue;
 
@@ -713,6 +731,10 @@ export async function registerRoutes(
                 }
                 batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot1.id);
                 batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
+                
+                // STRICT: Mark these times as occupied for this batch-semester
+                batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey1);
+                batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey2);
                 
                 daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
                 const semKey = `${batch.semester}-${bestDay}`;
