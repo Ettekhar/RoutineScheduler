@@ -209,7 +209,7 @@ export function ScheduleCalendar({
                         isLunch ? "w-24" : "w-40"
                       )}
                     >
-                      {isLunch ? "Lunch" : `${slot.startTime}-${slot.endTime}`}
+                      {isLunch ? "Lunch" : `${format24to12(slot.startTime)}-${format24to12(slot.endTime)}`}
                     </div>
                   );
                 })}

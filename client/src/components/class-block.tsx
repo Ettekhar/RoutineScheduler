@@ -7,6 +7,13 @@ import {
 } from "@/components/ui/tooltip";
 import { AlertTriangle, Users, MapPin, GraduationCap } from "lucide-react";
 
+const format24to12 = (time: string): string => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`;
+};
+
 interface ClassBlockProps {
   entry: ScheduleEntryWithDetails;
   onClick?: () => void;
@@ -164,7 +171,7 @@ export function ClassBlock({
           </div>
 
           <div className="text-xs text-muted-foreground">
-            {entry.timeSlot.startTime} - {entry.timeSlot.endTime}
+            {format24to12(entry.timeSlot.startTime)} - {format24to12(entry.timeSlot.endTime)}
           </div>
 
           {hasConflict && (
