@@ -81,6 +81,12 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        schedule: {
+          theory: "hsl(var(--schedule-theory) / <alpha-value>)",
+          lab: "hsl(var(--schedule-lab) / <alpha-value>)",
+          conflict: "hsl(var(--schedule-conflict) / <alpha-value>)",
+          special: "hsl(var(--schedule-special) / <alpha-value>)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
