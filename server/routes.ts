@@ -493,13 +493,9 @@ export async function registerRoutes(
         }
       }
 
-      // PHASE 2: Schedule lab classes - ONLY if batch has NO theory courses
+      // PHASE 2: Schedule lab classes - on different days from theory when possible
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
-        
-        // Skip if this batch has theory courses - no mixing theory and labs for same semester
-        if ((batchTheoryDays.get(batch.id)?.size ?? 0) > 0) continue;
-        
         const batchCourses = courses.filter(c => c.semester === batch.semester && c.courseType === "lab");
         
         for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
@@ -531,12 +527,14 @@ export async function registerRoutes(
               }
 
               for (let sess = 0; sess < sessionsNeeded; sess++) {
-                // Find least-loaded day excluding other group's days
+                // Find least-loaded day excluding other group's days AND theory days
                 const excludeDaysSet = new Set<string>();
                 if (group === "B") {
                   for (const d of usedGroupDays.A) excludeDaysSet.add(d);
                 }
                 for (const d of usedGroupDays[group]) excludeDaysSet.add(d);
+                // Also try to exclude days with theory classes
+                for (const d of (batchTheoryDays.get(batch.id) || new Set())) excludeDaysSet.add(d);
 
                 const bestDay = findLeastLoadedDay(excludeDaysSet);
                 if (!bestDay) break;
@@ -620,6 +618,8 @@ export async function registerRoutes(
             for (let sess = 0; sess < sessionsNeeded; sess++) {
               const excludeDaysSet = new Set<string>();
               for (const d of usedDays) excludeDaysSet.add(d);
+              // Also try to exclude days with theory classes
+              for (const d of (batchTheoryDays.get(batch.id) || new Set())) excludeDaysSet.add(d);
 
               const bestDay = findLeastLoadedDay(excludeDaysSet);
               if (!bestDay) break;
