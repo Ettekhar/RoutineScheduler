@@ -408,153 +408,154 @@ export class MemStorage implements IStorage {
 
 export const storage = new MemStorage();
 
-// Initialize with sample data
+// Initialize with YOUR exact data
 export async function initializeSampleData() {
-  // Teachers
+  // YOUR 31 TEACHERS
   const teachers = [
-    await storage.createTeacher({ 
-      name: "Dr. Ahmed Hassan", 
-      designation: "Assistant Professor", 
-      department: "Computer Science",
-      maxLoad: 18 
-    }),
-    await storage.createTeacher({ 
-      name: "Prof. Sarah Khan", 
-      designation: "Associate Professor", 
-      department: "Computer Science",
-      maxLoad: 16 
-    }),
-    await storage.createTeacher({ 
-      name: "Dr. Muhammad Ali", 
-      designation: "Assistant Professor", 
-      department: "Software Engineering",
-      maxLoad: 18 
-    }),
-    await storage.createTeacher({ 
-      name: "Ms. Fatima Noor", 
-      designation: "Lecturer", 
-      department: "Computer Science",
-      maxLoad: 20 
-    }),
-    await storage.createTeacher({ 
-      name: "Dr. Usman Khan", 
-      designation: "Professor", 
-      department: "Software Engineering",
-      maxLoad: 14 
-    }),
+    await storage.createTeacher({ name: "Prof. Usman Farooq", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Fatima Tariq", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Mr. Salim Baig", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Prof. Rashid Malik", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Rohan K. Patel", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Mr. Tariq Samad", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Anil Das", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Prof. Ravi Anand", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Sarah Ali", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Ms. Tanya Ahmed", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Prof. David S. Roy", designation: "Associate Professor", department: "Science", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Mr. Mahmood Ahmad", designation: "Associate Professor", department: "Humanities", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Ms. Nadia Malik", designation: "Associate Professor", department: "Humanities", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Dinesh K. Ghai", designation: "Associate Professor", department: "EEE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Mr. Karan Bhat", designation: "Associate Professor", department: "EEE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Shweta Iyer", designation: "Associate Professor", department: "SE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Ms. Swati Singh", designation: "Associate Professor", department: "Math", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Mr. Nikhil Kant", designation: "Associate Professor", department: "Humanities", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Prof. Anu Nair", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Arjun Roy", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Ms. Usha Hariom", designation: "Associate Professor", department: "Math", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Prof. Keshav E. Rao", designation: "Associate Professor", department: "Math", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Mr. Sharad Hari", designation: "Associate Professor", department: "Economics", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Suresh Hari", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Ms. Meera Shah", designation: "Associate Professor", department: "Math", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Mr. Mohan S. Upadhyay", designation: "Associate Professor", department: "Math", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Prof. Amit Mishra", designation: "Associate Professor", department: "Business", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Dr. Manish K. Negi", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Ms. Farida Ibrahim", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Mr. Jaswant Firdaus", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
+    await storage.createTeacher({ name: "Prof. Brijesh S. Singh", designation: "Associate Professor", department: "CSE", maxLoad: 20 }),
   ];
 
-  // Classrooms
+  // YOUR 20 CLASSROOMS
   const classrooms = [
-    await storage.createClassroom({ 
-      roomNumber: "CS-101", 
-      capacity: 60, 
-      roomType: "theory",
-      building: "Engineering Block A"
-    }),
-    await storage.createClassroom({ 
-      roomNumber: "CS-102", 
-      capacity: 40, 
-      roomType: "theory",
-      building: "Engineering Block A"
-    }),
-    await storage.createClassroom({ 
-      roomNumber: "CS-201", 
-      capacity: 30, 
-      roomType: "lab",
-      building: "Engineering Block B"
-    }),
-    await storage.createClassroom({ 
-      roomNumber: "CS-202", 
-      capacity: 30, 
-      roomType: "lab",
-      building: "Engineering Block B"
-    }),
+    await storage.createClassroom({ name: "Main Lecture A1", roomNumber: "A-101", capacity: 80, roomType: "theory", building: "Building A" }),
+    await storage.createClassroom({ name: "Main Lecture A2", roomNumber: "A-102", capacity: 75, roomType: "theory", building: "Building A" }),
+    await storage.createClassroom({ name: "Theory Room A3", roomNumber: "A-201", capacity: 60, roomType: "theory", building: "Building A" }),
+    await storage.createClassroom({ name: "Theory Room A4", roomNumber: "A-202", capacity: 55, roomType: "theory", building: "Building A" }),
+    await storage.createClassroom({ name: "Seminar Room A5", roomNumber: "A-301", capacity: 40, roomType: "theory", building: "Building A" }),
+    await storage.createClassroom({ name: "Main Lecture B1", roomNumber: "B-101", capacity: 85, roomType: "theory", building: "Building B" }),
+    await storage.createClassroom({ name: "Theory Room B2", roomNumber: "B-102", capacity: 65, roomType: "theory", building: "Building B" }),
+    await storage.createClassroom({ name: "Theory Room B3", roomNumber: "B-201", capacity: 50, roomType: "theory", building: "Building B" }),
+    await storage.createClassroom({ name: "Seminar Room B4", roomNumber: "B-301", capacity: 35, roomType: "theory", building: "Building B" }),
+    await storage.createClassroom({ name: "Theory Room C1", roomNumber: "C-101", capacity: 45, roomType: "theory", building: "Building C" }),
+    await storage.createClassroom({ name: "CSE Lab 1", roomNumber: "C-L01", capacity: 30, roomType: "lab", building: "Building C" }),
+    await storage.createClassroom({ name: "CSE Lab 2", roomNumber: "C-L02", capacity: 30, roomType: "lab", building: "Building C" }),
+    await storage.createClassroom({ name: "CSE Lab 3", roomNumber: "C-L03", capacity: 25, roomType: "lab", building: "Building C" }),
+    await storage.createClassroom({ name: "CSE Lab 4", roomNumber: "C-L04", capacity: 25, roomType: "lab", building: "Building C" }),
+    await storage.createClassroom({ name: "ENG Lab 1", roomNumber: "D-L01", capacity: 28, roomType: "lab", building: "Building D" }),
+    await storage.createClassroom({ name: "ENG Lab 2", roomNumber: "D-L02", capacity: 28, roomType: "lab", building: "Building D" }),
+    await storage.createClassroom({ name: "Electronics Lab", roomNumber: "D-L03", capacity: 20, roomType: "lab", building: "Building D" }),
+    await storage.createClassroom({ name: "EEE Lab", roomNumber: "D-L04", capacity: 22, roomType: "lab", building: "Building D" }),
+    await storage.createClassroom({ name: "CAD Lab", roomNumber: "E-L01", capacity: 15, roomType: "lab", building: "Building E" }),
+    await storage.createClassroom({ name: "Graphics Lab", roomNumber: "E-L02", capacity: 18, roomType: "lab", building: "Building E" }),
   ];
 
-  // Courses - Semester 1
+  // YOUR 56 EXACT COURSES
   const courses = [
-    await storage.createCourse({ 
-      code: "CS-101", 
-      name: "Introduction to Programming", 
-      semester: 1, 
-      creditHours: 3,
-      courseType: "theory",
-      sessionsPerWeek: 2
-    }),
-    await storage.createCourse({ 
-      code: "CS-102", 
-      name: "Programming Lab", 
-      semester: 1, 
-      creditHours: 1,
-      courseType: "lab",
-      sessionsPerWeek: 1
-    }),
-    // Semester 2
-    await storage.createCourse({ 
-      code: "CS-201", 
-      name: "Data Structures", 
-      semester: 2, 
-      creditHours: 3,
-      courseType: "theory",
-      sessionsPerWeek: 2
-    }),
-    await storage.createCourse({ 
-      code: "CS-202", 
-      name: "Data Structures Lab", 
-      semester: 2, 
-      creditHours: 1,
-      courseType: "lab",
-      sessionsPerWeek: 1
-    }),
-    // Semester 3
-    await storage.createCourse({ 
-      code: "SE-301", 
-      name: "Software Engineering", 
-      semester: 3, 
-      creditHours: 3,
-      courseType: "theory",
-      sessionsPerWeek: 2
-    }),
-    await storage.createCourse({ 
-      code: "CS-301", 
-      name: "Database Management", 
-      semester: 3, 
-      creditHours: 3,
-      courseType: "theory",
-      sessionsPerWeek: 2
-    }),
+    // SEM 1 - BATCH-41
+    await storage.createCourse({ code: "CSE1101", name: "Introduction to Computer Systems", semester: 1, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE1102", name: "Structured Programming Language", semester: 1, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE1103L", name: "Structured Programming Language Lab", semester: 1, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "MAT1104", name: "Math-I (Calculus)", semester: 1, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "PHY1105", name: "Physics (Electricity, Magnetism & Optics)", semester: 1, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "ENV1106", name: "Environmental Science", semester: 1, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "ENG1107", name: "English Reading & Public Speaking", semester: 1, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "BAN1108", name: "Bengali", semester: 1, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    // SEM 2 - BATCH-40
+    await storage.createCourse({ code: "CSE1201", name: "Object Oriented Programming (C++)", semester: 2, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE1202L", name: "OOP (C++) Lab", semester: 2, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "EEE1203", name: "Electrical & Electronics Circuits", semester: 2, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "EEE1204L", name: "Electrical & Electronics Circuits Lab", semester: 2, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "SE1205L", name: "Engineering Drawing & CAD Lab", semester: 2, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "MAT1206", name: "Discrete Mathematics", semester: 2, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "MAT1207", name: "Math-II (Co-ordinate Geometry & Vector Analysis)", semester: 2, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "ENG1208", name: "English Writing & Communication", semester: 2, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    // SEM 3 - BATCH-39
+    await storage.createCourse({ code: "CSE2301", name: "Data Structures", semester: 3, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE2302L", name: "Data Structures Lab", semester: 3, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE2303", name: "Digital Logic & System Design", semester: 3, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE2304L", name: "Digital Logic & System Design Lab", semester: 3, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "STA2305", name: "Statistics & Probability", semester: 3, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "MAT2306", name: "Math-III (Differential Equation & Special Function)", semester: 3, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "ECO2307", name: "Industrial Economics", semester: 3, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "PG2308", name: "Liberation War of Bangladesh", semester: 3, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    // SEM 4 - BATCH-38
+    await storage.createCourse({ code: "CSE2401", name: "Algorithm", semester: 4, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE2402L", name: "Algorithm Lab", semester: 4, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE2403", name: "Microprocessors & Microcontrollers", semester: 4, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE2404L", name: "Microcontrollers & Assembly Lab", semester: 4, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE2405L", name: "Java Programming Lab", semester: 4, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "MAT2406", name: "Numerical Methods", semester: 4, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "MAT2407", name: "Math-IV (Matrix & Complex Analysis)", semester: 4, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "BBA2408", name: "Introduction to Management & Marketing", semester: 4, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    // SEM 5 - BATCH-37
+    await storage.createCourse({ code: "CSE3501", name: "Database Management Systems", semester: 5, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3502L", name: "DBMS Lab", semester: 5, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3503", name: "Computer Graphics & Animation", semester: 5, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3504L", name: "CG & Animation Lab", semester: 5, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3505", name: "Communication Engineering", semester: 5, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3506", name: "Technical Writing & Presentation", semester: 5, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3507", name: "Computer Peripherals & Interfacing", semester: 5, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "BBA3508", name: "Financial & Managerial Accounting", semester: 5, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
+    // SEM 6 - BATCH-35 & BATCH-36
+    await storage.createCourse({ code: "CSE3601", name: "Operating System", semester: 6, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3602L", name: "Operating System Lab", semester: 6, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3603", name: "Web Engineering", semester: 6, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3604L", name: "Web Engineering Lab", semester: 6, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3605", name: "Computer Architecture", semester: 6, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3606", name: "Computer Peripherals", semester: 6, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3607", name: "Cloud Computing", semester: 6, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE3608L", name: "Mobile Application Lab", semester: 6, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    // SEM 7 - BATCH-34
+    await storage.createCourse({ code: "CSE4701", name: "Computer Networks & Cyber Security", semester: 7, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4702L", name: "CN & Cyber Security Lab", semester: 7, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4703", name: "Software Engineering", semester: 7, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4704L", name: "Software Engineering Lab", semester: 7, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4705", name: "Digital Signal & System", semester: 7, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4706", name: "Simulation and Modeling", semester: 7, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4707", name: "Computer Graphics & Animation", semester: 7, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4708L", name: "CG & Animation Lab", semester: 7, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    // SEM 8 - BATCH-33
+    await storage.createCourse({ code: "CSE4801", name: "Artificial Intelligence & Expert Systems", semester: 8, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4802L", name: "AI & Expert System Lab", semester: 8, creditHours: 2, courseType: "lab", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4803", name: "Technical Writing & Presentation", semester: 8, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4804", name: "Data Warehousing & Data Mining", semester: 8, creditHours: 3, courseType: "theory", sessionsPerWeek: 1 }),
+    await storage.createCourse({ code: "CSE4805", name: "IT Entrepreneurship", semester: 8, creditHours: 2, courseType: "theory", sessionsPerWeek: 1 }),
   ];
 
-  // Batches
+  // YOUR 9 EXACT BATCHES
   const batches = [
-    await storage.createBatch({ 
-      name: "CS-2024-A", 
-      semester: 1, 
-      studentCount: 45,
-      section: "A"
-    }),
-    await storage.createBatch({ 
-      name: "CS-2024-B", 
-      semester: 1, 
-      studentCount: 50,
-      section: "B"
-    }),
-    await storage.createBatch({ 
-      name: "CS-2023-A", 
-      semester: 2, 
-      studentCount: 48,
-      section: "A"
-    }),
-    await storage.createBatch({ 
-      name: "SE-2022-A", 
-      semester: 3, 
-      studentCount: 40,
-      section: "A"
-    }),
+    await storage.createBatch({ name: "BATCH-41", semester: 1, studentCount: 50, section: "A" }),
+    await storage.createBatch({ name: "BATCH-40", semester: 2, studentCount: 48, section: "A" }),
+    await storage.createBatch({ name: "BATCH-39", semester: 3, studentCount: 49, section: "A" }),
+    await storage.createBatch({ name: "BATCH-38", semester: 4, studentCount: 51, section: "A" }),
+    await storage.createBatch({ name: "BATCH-37", semester: 5, studentCount: 43, section: "A" }),
+    await storage.createBatch({ name: "BATCH-35", semester: 6, studentCount: 41, section: "A" }),
+    await storage.createBatch({ name: "BATCH-36", semester: 6, studentCount: 11, section: "A" }),
+    await storage.createBatch({ name: "BATCH-34", semester: 7, studentCount: 41, section: "A" }),
+    await storage.createBatch({ name: "BATCH-33", semester: 8, studentCount: 48, section: "A" }),
   ];
 
-  console.log("✓ Sample data initialized:");
+  console.log("✓ YOUR data initialized:");
   console.log(`  - ${teachers.length} teachers`);
   console.log(`  - ${courses.length} courses`);
   console.log(`  - ${batches.length} batches`);
