@@ -124,6 +124,13 @@ export const DEFAULT_TIME_SLOTS = [
   { startTime: '14:45', endTime: '15:30', slotNumber: 9 },
 ];
 
+// Lunch Break configuration
+export interface LunchBreakConfig {
+  startTime: string; // HH:MM format (e.g., "12:00")
+  endTime: string;   // HH:MM format (e.g., "13:00")
+  enabled: boolean;
+}
+
 // Statistics type for dashboard
 export interface ScheduleStats {
   totalTeachers: number;

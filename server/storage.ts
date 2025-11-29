@@ -15,6 +15,7 @@ import {
   type InsertScheduleEntry,
   type ScheduleEntryWithDetails,
   type ScheduleStats,
+  type LunchBreakConfig,
   DEFAULT_TIME_SLOTS,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
@@ -68,6 +69,10 @@ export interface IStorage {
 
   // Stats
   getStats(): Promise<ScheduleStats>;
+
+  // Lunch Break
+  getLunchBreak(): Promise<LunchBreakConfig>;
+  setLunchBreak(config: LunchBreakConfig): Promise<LunchBreakConfig>;
 }
 
 export class MemStorage implements IStorage {
@@ -78,6 +83,7 @@ export class MemStorage implements IStorage {
   private classrooms: Map<string, Classroom>;
   private timeSlots: Map<string, TimeSlot>;
   private scheduleEntries: Map<string, ScheduleEntry>;
+  private lunchBreak: LunchBreakConfig;
 
   constructor() {
     this.users = new Map();
@@ -87,6 +93,13 @@ export class MemStorage implements IStorage {
     this.classrooms = new Map();
     this.timeSlots = new Map();
     this.scheduleEntries = new Map();
+    
+    // Default lunch break: 12:00 PM - 1:00 PM
+    this.lunchBreak = {
+      startTime: '12:00',
+      endTime: '13:00',
+      enabled: true,
+    };
 
     // Initialize default time slots
     DEFAULT_TIME_SLOTS.forEach(slot => {
@@ -380,6 +393,16 @@ export class MemStorage implements IStorage {
       theorySessions: entries.filter(e => e.course.courseType === "theory").length,
       labSessions: entries.filter(e => e.course.courseType === "lab").length,
     };
+  }
+
+  // Lunch Break
+  async getLunchBreak(): Promise<LunchBreakConfig> {
+    return this.lunchBreak;
+  }
+
+  async setLunchBreak(config: LunchBreakConfig): Promise<LunchBreakConfig> {
+    this.lunchBreak = config;
+    return this.lunchBreak;
   }
 }
 

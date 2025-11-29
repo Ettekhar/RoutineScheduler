@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStats } from "@/components/dashboard-stats";
+import { LunchBreakSettings } from "@/components/lunch-break-settings";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
@@ -192,6 +193,9 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* Lunch Break Settings */}
+        <LunchBreakSettings />
 
         {/* Stats */}
         <DashboardStats 

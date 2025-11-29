@@ -14,7 +14,21 @@ import {
   type Teacher,
   type Classroom,
   type TimeSlot,
+  type LunchBreakConfig,
 } from "@shared/schema";
+
+// Helper function to check if a time slot is during lunch break
+function isLunchTime(slotStart: string, slotEnd: string, lunchBreak: LunchBreakConfig): boolean {
+  if (!lunchBreak.enabled) return false;
+  
+  const slotStartMin = parseInt(slotStart.split(':')[0]) * 60 + parseInt(slotStart.split(':')[1]);
+  const slotEndMin = parseInt(slotEnd.split(':')[0]) * 60 + parseInt(slotEnd.split(':')[1]);
+  const lunchStartMin = parseInt(lunchBreak.startTime.split(':')[0]) * 60 + parseInt(lunchBreak.startTime.split(':')[1]);
+  const lunchEndMin = parseInt(lunchBreak.endTime.split(':')[0]) * 60 + parseInt(lunchBreak.endTime.split(':')[1]);
+  
+  // Check if slot overlaps with lunch break
+  return slotStartMin < lunchEndMin && slotEndMin > lunchStartMin;
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -286,6 +300,7 @@ export async function registerRoutes(
       const batches = await storage.getBatches();
       const classrooms = await storage.getClassrooms();
       const timeSlots = await storage.getTimeSlots();
+      const lunchBreak = await storage.getLunchBreak();
 
       if (teachers.length === 0 || courses.length === 0 || batches.length === 0 || classrooms.length === 0) {
         return res.status(400).json({ 
@@ -352,6 +367,9 @@ export async function registerRoutes(
                 const slotKey = `${day}-${timeSlot.id}`;
                 const groupSlotKey = `${groupKey}-${slotKey}`;
 
+                // Skip lunch time slots
+                if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
+
                 // Check conflicts
                 const teacherOccupied = teacherSlots.get(teacher.id)?.has(slotKey);
                 const groupOccupied = groupSlots.get(groupKey)?.has(slotKey);
@@ -406,6 +424,31 @@ export async function registerRoutes(
   app.get("/api/stats", async (req, res) => {
     const stats = await storage.getStats();
     res.json(stats);
+  });
+
+  // Lunch Break
+  app.get("/api/lunch-break", async (req, res) => {
+    const lunchBreak = await storage.getLunchBreak();
+    res.json(lunchBreak);
+  });
+
+  app.post("/api/lunch-break", async (req, res) => {
+    try {
+      const { startTime, endTime, enabled } = req.body;
+      
+      if (!startTime || !endTime || enabled === undefined) {
+        return res.status(400).json({ message: "startTime, endTime, and enabled are required" });
+      }
+      
+      const lunchBreak = await storage.setLunchBreak({
+        startTime,
+        endTime,
+        enabled,
+      });
+      res.json(lunchBreak);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   });
 
   return httpServer;
