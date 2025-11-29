@@ -403,21 +403,19 @@ export async function registerRoutes(
         });
       });
 
-      // Find least-loaded day-time combination
-      const findLeastLoadedDayTimeSlot = (excludeDays?: Set<string>): DayTimeSlot | null => {
-        let minSlot: DayTimeSlot | null = null;
+      // Find least-loaded day (compact distribution - no AM/PM separation)
+      const findLeastLoadedDay = (excludeDays?: Set<string>): WorkingDay | null => {
+        let minDay: WorkingDay | null = null;
         let minCount = Infinity;
-        
-        for (const dts of dayTimeSlots) {
-          if (excludeDays?.has(dts.day)) continue;
-          const key = `${dts.day}-${dts.isAM ? 'AM' : 'PM'}`;
-          const count = dayTimeSlotCounts.get(key) || 0;
+        for (const day of WORKING_DAYS) {
+          if (excludeDays?.has(day)) continue;
+          const count = daySlotCounts.get(day) || 0;
           if (count < minCount) {
-            minSlot = dts;
+            minDay = day;
             minCount = count;
           }
         }
-        return minSlot;
+        return minDay;
       };
 
       // PHASE 1: Schedule ALL theory classes first - smart distribution
@@ -444,21 +442,17 @@ export async function registerRoutes(
           }
 
           for (let sess = 0; sess < sessionsNeeded; sess++) {
-            // Find least-loaded day-time combination (excludes days already used for theory)
+            // Find least-loaded day (excludes days already used for theory)
             const excludeDaysSet = new Set(batchTheoryDays.get(batch.id) || new Set());
-            const bestDTS = findLeastLoadedDayTimeSlot(excludeDaysSet);
-            if (!bestDTS) break;
+            const bestDay = findLeastLoadedDay(excludeDaysSet);
+            if (!bestDay) break;
 
-            // Try to find an available slot on this day in this time window
+            // Try to find an available slot on this day
             let scheduled = false;
             for (const timeSlot of timeSlots) {
               if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
               
-              // Only use time slots in the same AM/PM window
-              const isAM = parseInt(timeSlot.startTime) < 12;
-              if (isAM !== bestDTS.isAM) continue;
-              
-              const slotKey = `${bestDTS.day}-${timeSlot.id}`;
+              const slotKey = `${bestDay}-${timeSlot.id}`;
               
               if (teacherSlots.get(teacher.id)?.has(slotKey) || batchSlots.get(batch.id)?.has(slotKey)) continue;
 
@@ -477,7 +471,7 @@ export async function registerRoutes(
                 batchId: batch.id,
                 classroomId: availableRoom.id,
                 timeSlotId: timeSlot.id,
-                day: bestDTS.day,
+                day: bestDay,
                 labGroup: null,
                 hasConflict: false,
                 conflictType: null,
@@ -486,13 +480,10 @@ export async function registerRoutes(
               teacherSlots.get(teacher.id)?.add(slotKey);
               roomSlots.get(availableRoom.id)?.add(slotKey);
               batchSlots.get(batch.id)?.add(slotKey);
-              groupDays.get(groupKey)?.add(bestDTS.day);
-              batchTheoryDays.get(batch.id)?.add(bestDTS.day);
+              groupDays.get(groupKey)?.add(bestDay);
+              batchTheoryDays.get(batch.id)?.add(bestDay);
               
-              // Update both counters
-              const key = `${bestDTS.day}-${bestDTS.isAM ? 'AM' : 'PM'}`;
-              dayTimeSlotCounts.set(key, (dayTimeSlotCounts.get(key) || 0) + 1);
-              daySlotCounts.set(bestDTS.day, (daySlotCounts.get(bestDTS.day) || 0) + 1);
+              daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 1);
 
               scheduled = true;
               break;
@@ -502,9 +493,13 @@ export async function registerRoutes(
         }
       }
 
-      // PHASE 2: Schedule lab classes - avoid time slots already used by other labs for same batch-semester
+      // PHASE 2: Schedule lab classes - ONLY if batch has NO theory courses
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
+        
+        // Skip if this batch has theory courses - no mixing theory and labs for same semester
+        if ((batchTheoryDays.get(batch.id)?.size ?? 0) > 0) continue;
+        
         const batchCourses = courses.filter(c => c.semester === batch.semester && c.courseType === "lab");
         
         for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
@@ -536,15 +531,15 @@ export async function registerRoutes(
               }
 
               for (let sess = 0; sess < sessionsNeeded; sess++) {
-                // Find least-loaded day-time excluding other group's days
+                // Find least-loaded day excluding other group's days
                 const excludeDaysSet = new Set<string>();
                 if (group === "B") {
                   for (const d of usedGroupDays.A) excludeDaysSet.add(d);
                 }
                 for (const d of usedGroupDays[group]) excludeDaysSet.add(d);
 
-                const bestDTS = findLeastLoadedDayTimeSlot(excludeDaysSet);
-                if (!bestDTS) break;
+                const bestDay = findLeastLoadedDay(excludeDaysSet);
+                if (!bestDay) break;
 
                 // Find 2 consecutive time slots NOT already used by other labs for this batch-semester
                 const usedLabTimeSlots = batchSemesterLabTimeSlots.get(`${batch.id}-${batch.semester}`) || new Set();
@@ -555,15 +550,11 @@ export async function registerRoutes(
                   if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
                       isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
 
-                  // Only use slots in same AM/PM window
-                  const isAM = parseInt(slot1.startTime) < 12;
-                  if (isAM !== bestDTS.isAM) continue;
-
                   // Skip if these time slots already have labs for this batch-semester
                   if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
 
-                  const slotKey1 = `${bestDTS.day}-${slot1.id}`;
-                  const slotKey2 = `${bestDTS.day}-${slot2.id}`;
+                  const slotKey1 = `${bestDay}-${slot1.id}`;
+                  const slotKey2 = `${bestDay}-${slot2.id}`;
 
                   if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
                   if (batchSlots.get(batch.id)?.has(slotKey1) || batchSlots.get(batch.id)?.has(slotKey2)) continue;
@@ -578,14 +569,14 @@ export async function registerRoutes(
                   if (!availableRoom) continue;
 
                   for (const s of [slot1, slot2]) {
-                    const sk = `${bestDTS.day}-${s.id}`;
+                    const sk = `${bestDay}-${s.id}`;
                     await storage.createScheduleEntry({
                       courseId: course.id,
                       teacherId: teacher.id,
                       batchId: batch.id,
                       classroomId: availableRoom.id,
                       timeSlotId: s.id,
-                      day: bestDTS.day,
+                      day: bestDay,
                       labGroup: group,
                       hasConflict: false,
                       conflictType: null,
@@ -595,9 +586,9 @@ export async function registerRoutes(
                     batchSlots.get(batch.id)?.add(sk);
                   }
 
-                  groupDays.get(groupKey)?.add(bestDTS.day);
-                  usedGroupDays[group].add(bestDTS.day);
-                  batchLabDays.get(batch.id)?.add(bestDTS.day);
+                  groupDays.get(groupKey)?.add(bestDay);
+                  usedGroupDays[group].add(bestDay);
+                  batchLabDays.get(batch.id)?.add(bestDay);
                   
                   // Track time slots used by labs for this batch-semester
                   const batchSemKey = `${batch.id}-${batch.semester}`;
@@ -607,10 +598,7 @@ export async function registerRoutes(
                   batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot1.id);
                   batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
                   
-                  // Update counters
-                  const key = `${bestDTS.day}-${bestDTS.isAM ? 'AM' : 'PM'}`;
-                  dayTimeSlotCounts.set(key, (dayTimeSlotCounts.get(key) || 0) + 2);
-                  daySlotCounts.set(bestDTS.day, (daySlotCounts.get(bestDTS.day) || 0) + 2);
+                  daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
                   
                   scheduled = true;
                   break;
@@ -633,8 +621,8 @@ export async function registerRoutes(
               const excludeDaysSet = new Set<string>();
               for (const d of usedDays) excludeDaysSet.add(d);
 
-              const bestDTS = findLeastLoadedDayTimeSlot(excludeDaysSet);
-              if (!bestDTS) break;
+              const bestDay = findLeastLoadedDay(excludeDaysSet);
+              if (!bestDay) break;
 
               let scheduled = false;
               for (let i = 0; i < timeSlots.length - 1; i++) {
@@ -643,15 +631,11 @@ export async function registerRoutes(
                 if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
                     isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
 
-                // Only use slots in same AM/PM window
-                const isAM = parseInt(slot1.startTime) < 12;
-                if (isAM !== bestDTS.isAM) continue;
-
                 // Skip if these time slots already have labs for this batch-semester
                 if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
 
-                const slotKey1 = `${bestDTS.day}-${slot1.id}`;
-                const slotKey2 = `${bestDTS.day}-${slot2.id}`;
+                const slotKey1 = `${bestDay}-${slot1.id}`;
+                const slotKey2 = `${bestDay}-${slot2.id}`;
 
                 if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
                 if (batchSlots.get(batch.id)?.has(slotKey1) || batchSlots.get(batch.id)?.has(slotKey2)) continue;
@@ -666,14 +650,14 @@ export async function registerRoutes(
                 if (!availableRoom) continue;
 
                 for (const s of [slot1, slot2]) {
-                  const sk = `${bestDTS.day}-${s.id}`;
+                  const sk = `${bestDay}-${s.id}`;
                   await storage.createScheduleEntry({
                     courseId: course.id,
                     teacherId: teacher.id,
                     batchId: batch.id,
                     classroomId: availableRoom.id,
                     timeSlotId: s.id,
-                    day: bestDTS.day,
+                    day: bestDay,
                     labGroup: null,
                     hasConflict: false,
                     conflictType: null,
@@ -683,9 +667,9 @@ export async function registerRoutes(
                   batchSlots.get(batch.id)?.add(sk);
                 }
 
-                groupDays.get(groupKey)?.add(bestDTS.day);
-                usedDays.add(bestDTS.day);
-                batchLabDays.get(batch.id)?.add(bestDTS.day);
+                groupDays.get(groupKey)?.add(bestDay);
+                usedDays.add(bestDay);
+                batchLabDays.get(batch.id)?.add(bestDay);
                 
                 // Track time slots used by labs for this batch-semester
                 const batchSemKey = `${batch.id}-${batch.semester}`;
@@ -695,10 +679,7 @@ export async function registerRoutes(
                 batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot1.id);
                 batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
                 
-                // Update counters
-                const key = `${bestDTS.day}-${bestDTS.isAM ? 'AM' : 'PM'}`;
-                dayTimeSlotCounts.set(key, (dayTimeSlotCounts.get(key) || 0) + 2);
-                daySlotCounts.set(bestDTS.day, (daySlotCounts.get(bestDTS.day) || 0) + 2);
+                daySlotCounts.set(bestDay, (daySlotCounts.get(bestDay) || 0) + 2);
                 
                 scheduled = true;
                 break;
