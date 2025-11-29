@@ -111,17 +111,17 @@ export interface ScheduleFilters {
 export const WORKING_DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'] as const;
 export type WorkingDay = typeof WORKING_DAYS[number];
 
-// Default time slots (8 AM - 5 PM, 1 hour each)
+// Default time slots (8:45 AM - 3:30 PM, 45 minutes each)
 export const DEFAULT_TIME_SLOTS = [
-  { startTime: '08:00', endTime: '09:00', slotNumber: 1 },
-  { startTime: '09:00', endTime: '10:00', slotNumber: 2 },
-  { startTime: '10:00', endTime: '11:00', slotNumber: 3 },
-  { startTime: '11:00', endTime: '12:00', slotNumber: 4 },
-  { startTime: '12:00', endTime: '13:00', slotNumber: 5 },
-  { startTime: '13:00', endTime: '14:00', slotNumber: 6 },
-  { startTime: '14:00', endTime: '15:00', slotNumber: 7 },
-  { startTime: '15:00', endTime: '16:00', slotNumber: 8 },
-  { startTime: '16:00', endTime: '17:00', slotNumber: 9 },
+  { startTime: '08:45', endTime: '09:30', slotNumber: 1 },
+  { startTime: '09:30', endTime: '10:15', slotNumber: 2 },
+  { startTime: '10:15', endTime: '11:00', slotNumber: 3 },
+  { startTime: '11:00', endTime: '11:45', slotNumber: 4 },
+  { startTime: '11:45', endTime: '12:30', slotNumber: 5 },
+  { startTime: '12:30', endTime: '13:15', slotNumber: 6 },
+  { startTime: '13:15', endTime: '14:00', slotNumber: 7 },
+  { startTime: '14:00', endTime: '14:45', slotNumber: 8 },
+  { startTime: '14:45', endTime: '15:30', slotNumber: 9 },
 ];
 
 // Statistics type for dashboard

@@ -293,50 +293,34 @@ export async function registerRoutes(
         });
       }
 
-      // Track occupied slots
+      // Track occupied slots per group
       const teacherSlots = new Map<string, Set<string>>();
       const roomSlots = new Map<string, Set<string>>();
-      const batchSlots = new Map<string, Set<string>>();
+      const groupSlots = new Map<string, Set<string>>(); // For batch + group combinations
 
       teachers.forEach(t => teacherSlots.set(t.id, new Set()));
       classrooms.forEach(r => roomSlots.set(r.id, new Set()));
-      batches.forEach(b => batchSlots.set(b.id, new Set()));
-
-      // Group courses by semester
-      const coursesBySemester = new Map<number, Course[]>();
-      courses.forEach(course => {
-        const semCourses = coursesBySemester.get(course.semester) || [];
-        semCourses.push(course);
-        coursesBySemester.set(course.semester, semCourses);
-      });
 
       // Assign teachers to courses (round-robin)
       const courseTeachers = new Map<string, Teacher>();
       let teacherIndex = 0;
       courses.forEach(course => {
-        // Try to find a teacher that isn't overloaded
-        let assigned = false;
-        for (let i = 0; i < teachers.length; i++) {
-          const teacher = teachers[(teacherIndex + i) % teachers.length];
-          courseTeachers.set(course.id, teacher);
-          assigned = true;
-          teacherIndex = (teacherIndex + i + 1) % teachers.length;
-          break;
-        }
+        const teacher = teachers[(teacherIndex) % teachers.length];
+        courseTeachers.set(course.id, teacher);
+        teacherIndex = (teacherIndex + 1) % teachers.length;
       });
 
       // Schedule each batch's courses
       for (const batch of batches) {
-        const semesterCourses = coursesBySemester.get(batch.semester) || [];
+        const batchCourses = courses.filter(c => c.semester === batch.semester);
         
-        for (const course of semesterCourses) {
+        for (const course of batchCourses) {
           const teacher = courseTeachers.get(course.id);
           if (!teacher) continue;
 
-          // Determine number of sessions needed
-          const sessionsNeeded = course.sessionsPerWeek;
           const isLab = course.courseType === "lab";
           const needsSplit = isLab && batch.studentCount > 25;
+          const sessionsNeeded = course.sessionsPerWeek;
 
           // Find suitable rooms
           const suitableRooms = classrooms.filter(r => 
@@ -346,20 +330,35 @@ export async function registerRoutes(
 
           if (suitableRooms.length === 0) continue;
 
-          // Schedule sessions
-          for (let session = 0; session < sessionsNeeded; session++) {
-            // Try to find an available slot
-            for (const day of WORKING_DAYS) {
-              for (const timeSlot of timeSlots) {
-                const slotKey = `${day}-${timeSlot.id}`;
-                
-                // Check if teacher, room, and batch are available
-                const teacherOccupied = teacherSlots.get(teacher.id)?.has(slotKey);
-                const batchOccupied = batchSlots.get(batch.id)?.has(slotKey);
-                
-                if (teacherOccupied || batchOccupied) continue;
+          // If lab with >25 students, split into groups
+          const groups = needsSplit ? ["A", "B"] : [null];
 
-                // Find an available room
+          for (const group of groups) {
+            const groupKey = `${batch.id}-${group || "full"}`;
+            if (!groupSlots.has(groupKey)) {
+              groupSlots.set(groupKey, new Set());
+            }
+
+            // Schedule sessions for this group
+            let sessionsScheduled = 0;
+            
+            for (const day of WORKING_DAYS) {
+              if (sessionsScheduled >= sessionsNeeded) break;
+              
+              for (let slotIdx = 0; slotIdx < timeSlots.length; slotIdx++) {
+                if (sessionsScheduled >= sessionsNeeded) break;
+                
+                const timeSlot = timeSlots[slotIdx];
+                const slotKey = `${day}-${timeSlot.id}`;
+                const groupSlotKey = `${groupKey}-${slotKey}`;
+
+                // Check conflicts
+                const teacherOccupied = teacherSlots.get(teacher.id)?.has(slotKey);
+                const groupOccupied = groupSlots.get(groupKey)?.has(slotKey);
+
+                if (teacherOccupied || groupOccupied) continue;
+
+                // Find available room
                 let availableRoom: Classroom | undefined;
                 for (const room of suitableRooms) {
                   if (!roomSlots.get(room.id)?.has(slotKey)) {
@@ -370,49 +369,26 @@ export async function registerRoutes(
 
                 if (!availableRoom) continue;
 
-                if (needsSplit) {
-                  // Create two lab groups
-                  for (const group of ["A", "B"]) {
-                    await storage.createScheduleEntry({
-                      courseId: course.id,
-                      teacherId: teacher.id,
-                      batchId: batch.id,
-                      classroomId: availableRoom.id,
-                      timeSlotId: timeSlot.id,
-                      day,
-                      labGroup: group,
-                      hasConflict: false,
-                      conflictType: null,
-                    });
-                  }
-                } else {
-                  await storage.createScheduleEntry({
-                    courseId: course.id,
-                    teacherId: teacher.id,
-                    batchId: batch.id,
-                    classroomId: availableRoom.id,
-                    timeSlotId: timeSlot.id,
-                    day,
-                    labGroup: null,
-                    hasConflict: false,
-                    conflictType: null,
-                  });
-                }
+                // Create schedule entry
+                await storage.createScheduleEntry({
+                  courseId: course.id,
+                  teacherId: teacher.id,
+                  batchId: batch.id,
+                  classroomId: availableRoom.id,
+                  timeSlotId: timeSlot.id,
+                  day,
+                  labGroup: group,
+                  hasConflict: false,
+                  conflictType: null,
+                });
 
                 // Mark slots as occupied
                 teacherSlots.get(teacher.id)?.add(slotKey);
                 roomSlots.get(availableRoom.id)?.add(slotKey);
-                batchSlots.get(batch.id)?.add(slotKey);
+                groupSlots.get(groupKey)?.add(slotKey);
 
-                break; // Move to next day for next session
+                sessionsScheduled++;
               }
-              
-              // Check if we scheduled enough for this session
-              const currentEntries = await storage.getScheduleEntries();
-              const courseBatchEntries = currentEntries.filter(
-                e => e.courseId === course.id && e.batchId === batch.id
-              );
-              if (courseBatchEntries.length >= session + 1) break;
             }
           }
         }
