@@ -375,10 +375,19 @@ export async function registerRoutes(
       });
 
       // Schedule each batch's courses
-      for (const batch of batches) {
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
+        const dayStartOffset = batchIndex % WORKING_DAYS.length; // Stagger starting days
         const batchCourses = courses.filter(c => c.semester === batch.semester);
         
-        for (const course of batchCourses) {
+        // Reorder days based on batch offset to spread load
+        const daysInOrder = [
+          ...WORKING_DAYS.slice(dayStartOffset),
+          ...WORKING_DAYS.slice(0, dayStartOffset)
+        ];
+        
+        for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
+          const course = batchCourses[courseIdx];
           const teacher = courseTeachers.get(course.id);
           if (!teacher) continue;
 
@@ -403,7 +412,7 @@ export async function registerRoutes(
             }
 
             let sessionsScheduled = 0;
-            for (const day of WORKING_DAYS) {
+            for (const day of daysInOrder) {
               if (sessionsScheduled >= sessionsNeeded) break;
               
               let dayScheduled = false;
@@ -473,7 +482,7 @@ export async function registerRoutes(
               let sessionsScheduled = 0;
               
               // Try to schedule on different days for each group
-              for (const day of WORKING_DAYS) {
+              for (const day of daysInOrder) {
                 if (sessionsScheduled >= sessionsNeeded) break;
 
                 // For group B, try to use different days than group A
@@ -541,7 +550,7 @@ export async function registerRoutes(
             }
 
             let sessionsScheduled = 0;
-            for (const day of WORKING_DAYS) {
+            for (const day of daysInOrder) {
               if (sessionsScheduled >= sessionsNeeded) break;
 
               // Find 2 consecutive slots for lab
