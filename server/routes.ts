@@ -293,13 +293,15 @@ export async function registerRoutes(
   function findConsecutiveSlots(
     day: string,
     groupKey: string,
+    batchId: string,
     teacher: Teacher,
     room: Classroom,
     timeSlots: TimeSlot[],
     lunchBreak: LunchBreakConfig,
     teacherSlots: Map<string, Set<string>>,
     roomSlots: Map<string, Set<string>>,
-    groupSlots: Map<string, Set<string>>
+    groupSlots: Map<string, Set<string>>,
+    batchSlots: Map<string, Set<string>>
   ): { slot1: TimeSlot; slot2: TimeSlot } | null {
     // Try to find 2 consecutive slots
     for (let i = 0; i < timeSlots.length - 1; i++) {
@@ -320,10 +322,12 @@ export async function registerRoutes(
                          !teacherSlots.get(teacher.id)?.has(slotKey2);
       const groupFree = !groupSlots.get(groupKey)?.has(slotKey1) && 
                        !groupSlots.get(groupKey)?.has(slotKey2);
+      const batchFree = !batchSlots.get(batchId)?.has(slotKey1) && 
+                       !batchSlots.get(batchId)?.has(slotKey2);
       const roomFree = !roomSlots.get(room.id)?.has(slotKey1) && 
                       !roomSlots.get(room.id)?.has(slotKey2);
 
-      if (teacherFree && groupFree && roomFree) {
+      if (teacherFree && groupFree && batchFree && roomFree) {
         return { slot1, slot2 };
       }
     }
@@ -354,10 +358,12 @@ export async function registerRoutes(
       const teacherSlots = new Map<string, Set<string>>();
       const roomSlots = new Map<string, Set<string>>();
       const groupSlots = new Map<string, Set<string>>(); // For batch + group combinations
+      const batchSlots = new Map<string, Set<string>>(); // Track entire batch occupancy (blocks all students)
       const groupDays = new Map<string, Set<string>>(); // Track which days each group is used
 
       teachers.forEach(t => teacherSlots.set(t.id, new Set()));
       classrooms.forEach(r => roomSlots.set(r.id, new Set()));
+      batches.forEach(b => batchSlots.set(b.id, new Set()));
 
       // Assign teachers to courses (round-robin)
       const courseTeachers = new Map<string, Teacher>();
@@ -408,11 +414,12 @@ export async function registerRoutes(
                 // Skip lunch time slots
                 if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
 
-                // Check conflicts
+                // Check conflicts - for theory, entire batch is occupied
                 const teacherOccupied = teacherSlots.get(teacher.id)?.has(slotKey);
                 const groupOccupied = groupSlots.get(groupKey)?.has(slotKey);
+                const batchOccupied = batchSlots.get(batch.id)?.has(slotKey);
 
-                if (teacherOccupied || groupOccupied) continue;
+                if (teacherOccupied || groupOccupied || batchOccupied) continue;
 
                 // Find available room
                 let availableRoom: Classroom | undefined;
@@ -438,10 +445,11 @@ export async function registerRoutes(
                   conflictType: null,
                 });
 
-                // Mark slots as occupied
+                // Mark slots as occupied - for theory, mark entire batch as occupied
                 teacherSlots.get(teacher.id)?.add(slotKey);
                 roomSlots.get(availableRoom.id)?.add(slotKey);
                 groupSlots.get(groupKey)?.add(slotKey);
+                batchSlots.get(batch.id)?.add(slotKey);
                 groupDays.get(groupKey)?.add(day);
 
                 sessionsScheduled++;
@@ -477,13 +485,15 @@ export async function registerRoutes(
                   const consecutive = findConsecutiveSlots(
                     day,
                     groupKey,
+                    batch.id,
                     teacher,
                     room,
                     timeSlots,
                     lunchBreak,
                     teacherSlots,
                     roomSlots,
-                    groupSlots
+                    groupSlots,
+                    batchSlots
                   );
 
                   if (consecutive) {
@@ -506,10 +516,11 @@ export async function registerRoutes(
                         conflictType: null,
                       });
 
-                      // Mark slots as occupied
+                      // Mark slots as occupied - for lab groups, mark specific group AND batch
                       teacherSlots.get(teacher.id)?.add(slotKey);
                       roomSlots.get(availableRoom.id)?.add(slotKey);
                       groupSlots.get(groupKey)?.add(slotKey);
+                      batchSlots.get(batch.id)?.add(slotKey);
                     }
 
                     groupDays.get(groupKey)?.add(day);
@@ -537,13 +548,15 @@ export async function registerRoutes(
                 const consecutive = findConsecutiveSlots(
                   day,
                   groupKey,
+                  batch.id,
                   teacher,
                   room,
                   timeSlots,
                   lunchBreak,
                   teacherSlots,
                   roomSlots,
-                  groupSlots
+                  groupSlots,
+                  batchSlots
                 );
 
                 if (consecutive) {
@@ -566,10 +579,11 @@ export async function registerRoutes(
                       conflictType: null,
                     });
 
-                    // Mark slots as occupied
+                    // Mark slots as occupied - for lab without grouping, mark batch
                     teacherSlots.get(teacher.id)?.add(slotKey);
                     roomSlots.get(availableRoom.id)?.add(slotKey);
                     groupSlots.get(groupKey)?.add(slotKey);
+                    batchSlots.get(batch.id)?.add(slotKey);
                   }
 
                   groupDays.get(groupKey)?.add(day);
