@@ -680,8 +680,8 @@ export async function registerRoutes(app: Express): Promise<void> {
           if (needsSplit) {
             // Lab: >25 students - split into groups A and B on different days
             // PRIORITIZE EARLY TIME SLOTS: Loop through time slots first, then days
-            const groups = ["A", "B"];
-            const usedGroupDays = {
+            const groups = ["A", "B"] as const;
+            const usedGroupDays: Record<string, Set<string>> = {
               A: new Set<string>(),
               B: new Set<string>(),
             };
@@ -729,9 +729,9 @@ export async function registerRoutes(app: Express): Promise<void> {
                   if (scheduledCount >= sessionsNeeded) break;
 
                   // Skip if group already used this day
-                  if (usedGroupDays[group].has(day)) continue;
+                  if (usedGroupDays[group]?.has(day)) continue;
                   // For group B, skip days used by group A to spread across different days
-                  if (group === "B" && usedGroupDays.A.has(day)) continue;
+                  if (group === "B" && usedGroupDays["A"]?.has(day)) continue;
 
                   const slotKey1 = `${day}-${slot1.id}`;
                   const slotKey2 = `${day}-${slot2.id}`;

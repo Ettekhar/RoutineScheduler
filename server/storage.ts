@@ -510,6 +510,7 @@ export class MemStorage implements IStorage {
       hasConflict: insertEntry.hasConflict || false,
       conflictType: insertEntry.conflictType || null,
       labGroup: insertEntry.labGroup || null,
+      session: insertEntry.session ?? this.currentSession,
     };
     this.scheduleEntries.set(id, entry);
 
