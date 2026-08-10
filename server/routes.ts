@@ -962,7 +962,8 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       const entries = await storage.getScheduleEntriesWithDetails();
-      res.json(entries);
+      const stats = await storage.getStats();
+      res.json({ entries, stats });
     } catch (error: any) {
       console.error("Schedule generation error:", error);
       res

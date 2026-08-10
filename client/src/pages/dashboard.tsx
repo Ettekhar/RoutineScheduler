@@ -81,16 +81,22 @@ export default function Dashboard() {
 
   const generateMutation = useMutation({
     mutationFn: async (sessionName: string) => {
-      return apiRequest("POST", "/api/schedule/generate", { sessionName });
+      const res = await apiRequest("POST", "/api/schedule/generate", { sessionName });
+      return res.json() as Promise<{ entries: any[]; stats: any }>;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/schedule"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+    onSuccess: ({ entries, stats }) => {
+      // Populate caches directly from the generate response so the UI
+      // updates immediately without a refetch hitting a different Vercel
+      // serverless instance that has no memory of the generated data.
+      queryClient.setQueryData(["/api/schedule"], entries);
+      queryClient.setQueryData(["/api/stats"], stats);
+
+      // These reads are cheap and don't depend on the generated state
       queryClient.invalidateQueries({ queryKey: ["/api/teachers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/sessions"] });
       toast({
         title: "Schedule Generated",
-        description: "A new conflict-free schedule has been created.",
+        description: `A new conflict-free schedule has been created (${entries.length} classes).`,
       });
       setShowGenerateDialog(false);
       setSelectedSession("");
@@ -104,6 +110,7 @@ export default function Dashboard() {
       });
     },
   });
+
 
   const clearMutation = useMutation({
     mutationFn: async (sessionName: string) => {
