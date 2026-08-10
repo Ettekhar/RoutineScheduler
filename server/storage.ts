@@ -186,30 +186,50 @@ export class MemStorage implements IStorage {
   }
 
   private async detectStorageFilePath(): Promise<void> {
-    const candidates = [
+    // On Vercel serverless, /var/task is read-only but /tmp is writable.
+    // Seed /tmp/storage.json from the bundled copy on first use so predata
+    // is available, and all subsequent writes (generate, edit, etc.) go there.
+    const tmpPath = "/tmp/storage.json";
+    const bundlePaths = [
       process.env.STORAGE_FILE_PATH,
       path.resolve(process.cwd(), "storage.json"),
       path.resolve(process.cwd(), "..", "storage.json"),
-      path.resolve(process.cwd(), "server", "..", "storage.json"),
-      // Vercel serverless: __dirname is dist/, storage.json is at project root
       typeof __dirname !== "undefined"
         ? path.resolve(__dirname, "..", "storage.json")
         : null,
-      // Explicit Vercel path
       "/var/task/storage.json",
-    ].filter((value): value is string => Boolean(value));
+    ].filter((v): v is string => Boolean(v));
 
-    for (const candidate of candidates) {
+    // Check if /tmp already has a seeded copy (writable, from a previous request
+    // on this warm instance). Use it directly so generated data is preserved.
+    try {
+      await fs.access(tmpPath);
+      this.storageFilePath = tmpPath;
+      return;
+    } catch {
+      // /tmp copy doesn't exist yet — seed it from the bundle
+    }
+
+    // Find the read-only bundle storage.json and copy it to /tmp
+    for (const candidate of bundlePaths) {
       try {
         await fs.access(candidate);
-        this.storageFilePath = candidate;
+        // Copy to /tmp so subsequent writes succeed
+        try {
+          await fs.copyFile(candidate, tmpPath);
+          this.storageFilePath = tmpPath;
+        } catch {
+          // copyFile failed (e.g. local dev) — use original path directly
+          this.storageFilePath = candidate;
+        }
         return;
       } catch {
-        // try the next candidate
+        // try next candidate
       }
     }
 
-    this.storageFilePath = path.resolve(process.cwd(), "storage.json");
+    // Fallback: try to write to /tmp even without a seed file
+    this.storageFilePath = tmpPath;
   }
 
   private restore(state: StorageState) {
