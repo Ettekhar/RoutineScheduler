@@ -60,7 +60,7 @@ app.use((req, res, next) => {
   next();
 });
 
- (async () => {
+(async () => {
   await storage.initialize();
   await registerRoutes(app);
 

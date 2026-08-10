@@ -1,9 +1,9 @@
 import type { Express } from "express";
 import { storage } from "./storage";
-import { 
-  insertTeacherSchema, 
-  insertCourseSchema, 
-  insertBatchSchema, 
+import {
+  insertTeacherSchema,
+  insertCourseSchema,
+  insertBatchSchema,
   insertClassroomSchema,
   insertScheduleEntrySchema,
   WORKING_DAYS,
@@ -17,20 +17,29 @@ import {
 } from "@shared/schema";
 
 // Helper function to check if a time slot is during lunch break
-function isLunchTime(slotStart: string, slotEnd: string, lunchBreak: LunchBreakConfig): boolean {
+function isLunchTime(
+  slotStart: string,
+  slotEnd: string,
+  lunchBreak: LunchBreakConfig,
+): boolean {
   if (!lunchBreak.enabled) return false;
-  
-  const slotStartMin = parseInt(slotStart.split(':')[0]) * 60 + parseInt(slotStart.split(':')[1]);
-  const slotEndMin = parseInt(slotEnd.split(':')[0]) * 60 + parseInt(slotEnd.split(':')[1]);
-  const lunchStartMin = parseInt(lunchBreak.startTime.split(':')[0]) * 60 + parseInt(lunchBreak.startTime.split(':')[1]);
-  const lunchEndMin = parseInt(lunchBreak.endTime.split(':')[0]) * 60 + parseInt(lunchBreak.endTime.split(':')[1]);
-  
+
+  const slotStartMin =
+    parseInt(slotStart.split(":")[0]) * 60 + parseInt(slotStart.split(":")[1]);
+  const slotEndMin =
+    parseInt(slotEnd.split(":")[0]) * 60 + parseInt(slotEnd.split(":")[1]);
+  const lunchStartMin =
+    parseInt(lunchBreak.startTime.split(":")[0]) * 60 +
+    parseInt(lunchBreak.startTime.split(":")[1]);
+  const lunchEndMin =
+    parseInt(lunchBreak.endTime.split(":")[0]) * 60 +
+    parseInt(lunchBreak.endTime.split(":")[1]);
+
   // Check if slot overlaps with lunch break
   return slotStartMin < lunchEndMin && slotEndMin > lunchStartMin;
 }
 
 export async function registerRoutes(app: Express): Promise<void> {
-  
   // Teachers CRUD
   app.get("/api/teachers", async (req, res) => {
     const teachers = await storage.getTeachers();
@@ -217,11 +226,11 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const { id } = req.params;
       const data = insertScheduleEntrySchema.partial().parse(req.body);
-      
+
       // Check for conflicts
       const entries = await storage.getScheduleEntries();
-      const otherEntries = entries.filter(e => e.id !== id);
-      
+      const otherEntries = entries.filter((e) => e.id !== id);
+
       let hasConflict = false;
       let conflictType: string | null = null;
 
@@ -229,7 +238,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         // Check teacher conflict
         if (data.teacherId) {
           const teacherConflict = otherEntries.find(
-            e => e.teacherId === data.teacherId && e.day === data.day && e.timeSlotId === data.timeSlotId
+            (e) =>
+              e.teacherId === data.teacherId &&
+              e.day === data.day &&
+              e.timeSlotId === data.timeSlotId,
           );
           if (teacherConflict) {
             hasConflict = true;
@@ -240,7 +252,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         // Check room conflict
         if (data.classroomId) {
           const roomConflict = otherEntries.find(
-            e => e.classroomId === data.classroomId && e.day === data.day && e.timeSlotId === data.timeSlotId
+            (e) =>
+              e.classroomId === data.classroomId &&
+              e.day === data.day &&
+              e.timeSlotId === data.timeSlotId,
           );
           if (roomConflict) {
             hasConflict = true;
@@ -251,7 +266,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         // Check batch conflict
         if (data.batchId) {
           const batchConflict = otherEntries.find(
-            e => e.batchId === data.batchId && e.day === data.day && e.timeSlotId === data.timeSlotId
+            (e) =>
+              e.batchId === data.batchId &&
+              e.day === data.day &&
+              e.timeSlotId === data.timeSlotId,
           );
           if (batchConflict) {
             hasConflict = true;
@@ -265,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         hasConflict,
         conflictType,
       });
-      
+
       if (!entry) {
         return res.status(404).json({ message: "Schedule entry not found" });
       }
@@ -287,10 +305,12 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.delete("/api/schedule", async (req, res) => {
     try {
       const { sessionName } = req.body || {};
-      if (sessionName && typeof sessionName !== 'string') {
-        return res.status(400).json({ message: "sessionName must be a string" });
+      if (sessionName && typeof sessionName !== "string") {
+        return res
+          .status(400)
+          .json({ message: "sessionName must be a string" });
       }
-      const session = sessionName || await storage.getCurrentSession();
+      const session = sessionName || (await storage.getCurrentSession());
       await storage.clearScheduleForSession(session);
       res.status(204).send();
     } catch (error: any) {
@@ -310,16 +330,18 @@ export async function registerRoutes(app: Express): Promise<void> {
     teacherSlots: Map<string, Set<string>>,
     roomSlots: Map<string, Set<string>>,
     groupSlots: Map<string, Set<string>>,
-    batchSlots: Map<string, Set<string>>
+    batchSlots: Map<string, Set<string>>,
   ): { slot1: TimeSlot; slot2: TimeSlot } | null {
     // Try to find 2 consecutive slots
     for (let i = 0; i < timeSlots.length - 1; i++) {
       const slot1 = timeSlots[i];
       const slot2 = timeSlots[i + 1];
-      
+
       // Skip if either slot is lunch time
-      if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
-          isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) {
+      if (
+        isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
+        isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)
+      ) {
         continue;
       }
 
@@ -327,20 +349,24 @@ export async function registerRoutes(app: Express): Promise<void> {
       const slotKey2 = `${day}-${slot2.id}`;
 
       // Check if both slots are available
-      const teacherFree = !teacherSlots.get(teacher.id)?.has(slotKey1) && 
-                         !teacherSlots.get(teacher.id)?.has(slotKey2);
-      const groupFree = !groupSlots.get(groupKey)?.has(slotKey1) && 
-                       !groupSlots.get(groupKey)?.has(slotKey2);
-      const batchFree = !batchSlots.get(batchId)?.has(slotKey1) && 
-                       !batchSlots.get(batchId)?.has(slotKey2);
-      const roomFree = !roomSlots.get(room.id)?.has(slotKey1) && 
-                      !roomSlots.get(room.id)?.has(slotKey2);
+      const teacherFree =
+        !teacherSlots.get(teacher.id)?.has(slotKey1) &&
+        !teacherSlots.get(teacher.id)?.has(slotKey2);
+      const groupFree =
+        !groupSlots.get(groupKey)?.has(slotKey1) &&
+        !groupSlots.get(groupKey)?.has(slotKey2);
+      const batchFree =
+        !batchSlots.get(batchId)?.has(slotKey1) &&
+        !batchSlots.get(batchId)?.has(slotKey2);
+      const roomFree =
+        !roomSlots.get(room.id)?.has(slotKey1) &&
+        !roomSlots.get(room.id)?.has(slotKey2);
 
       if (teacherFree && groupFree && batchFree && roomFree) {
         return { slot1, slot2 };
       }
     }
-    
+
     return null;
   }
 
@@ -355,11 +381,13 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       // Get session from request or use current
       const { sessionName } = req.body || {};
-      if (sessionName && typeof sessionName !== 'string') {
-        return res.status(400).json({ message: "sessionName must be a string" });
+      if (sessionName && typeof sessionName !== "string") {
+        return res
+          .status(400)
+          .json({ message: "sessionName must be a string" });
       }
-      const currentSession = sessionName || await storage.getCurrentSession();
-      
+      const currentSession = sessionName || (await storage.getCurrentSession());
+
       // If sessionName provided, set it as current
       if (sessionName && sessionName.trim()) {
         await storage.setCurrentSession(sessionName);
@@ -375,9 +403,15 @@ export async function registerRoutes(app: Express): Promise<void> {
       const timeSlots = await storage.getTimeSlots();
       const lunchBreak = await storage.getLunchBreak();
 
-      if (teachers.length === 0 || courses.length === 0 || batches.length === 0 || classrooms.length === 0) {
-        return res.status(400).json({ 
-          message: "Not enough data to generate schedule. Please add teachers, courses, batches, and classrooms." 
+      if (
+        teachers.length === 0 ||
+        courses.length === 0 ||
+        batches.length === 0 ||
+        classrooms.length === 0
+      ) {
+        return res.status(400).json({
+          message:
+            "Not enough data to generate schedule. Please add teachers, courses, batches, and classrooms.",
         });
       }
 
@@ -395,27 +429,30 @@ export async function registerRoutes(app: Express): Promise<void> {
       const batchSemesterTimeSlots = new Map<string, Set<string>>(); // STRICT: Track day-time slots used by batch-semester (theory OR lab, not both)
       const semesterTimeSlots = new Map<number, Set<string>>(); // STRICT SEMESTER LEVEL: No time slot can be used twice in same semester
 
-      teachers.forEach(t => teacherSlots.set(t.id, new Set()));
-      classrooms.forEach(r => roomSlots.set(r.id, new Set()));
-      batches.forEach(b => {
+      teachers.forEach((t) => teacherSlots.set(t.id, new Set()));
+      classrooms.forEach((r) => roomSlots.set(r.id, new Set()));
+      batches.forEach((b) => {
         batchSlots.set(b.id, new Set());
         batchTheoryDays.set(b.id, new Set());
         batchLabDays.set(b.id, new Set());
       });
-      WORKING_DAYS.forEach(d => daySlotCounts.set(d, 0));
-      
+      WORKING_DAYS.forEach((d) => daySlotCounts.set(d, 0));
+
       // Initialize semester time slots
       const uniqueSemesters = new Set<number>();
-      courses.forEach(c => uniqueSemesters.add(c.semester));
-      uniqueSemesters.forEach(sem => semesterTimeSlots.set(sem, new Set()));
-      
+      courses.forEach((c) => uniqueSemesters.add(c.semester));
+      uniqueSemesters.forEach((sem) => semesterTimeSlots.set(sem, new Set()));
+
       // Pre-calculate total weekly classes per semester
       const semesterWeeklyCounts = new Map<number, number>();
-      courses.forEach(course => {
+      courses.forEach((course) => {
         const current = semesterWeeklyCounts.get(course.semester) || 0;
-        semesterWeeklyCounts.set(course.semester, current + course.sessionsPerWeek);
+        semesterWeeklyCounts.set(
+          course.semester,
+          current + course.sessionsPerWeek,
+        );
       });
-      
+
       // Calculate target distribution per day per semester
       const semesterDayTargets = new Map<number, number>();
       semesterWeeklyCounts.forEach((count, sem) => {
@@ -426,8 +463,8 @@ export async function registerRoutes(app: Express): Promise<void> {
       // Assign teachers to courses (round-robin)
       const courseTeachers = new Map<string, Teacher>();
       let teacherIndex = 0;
-      courses.forEach(course => {
-        const teacher = teachers[(teacherIndex) % teachers.length];
+      courses.forEach((course) => {
+        const teacher = teachers[teacherIndex % teachers.length];
         courseTeachers.set(course.id, teacher);
         teacherIndex = (teacherIndex + 1) % teachers.length;
       });
@@ -438,31 +475,34 @@ export async function registerRoutes(app: Express): Promise<void> {
         timeSlot: TimeSlot;
         isAM: boolean; // true if 8:45-13:15, false if 14:00-15:30 (lunch 13:15-14:00)
       }
-      
+
       const dayTimeSlots: DayTimeSlot[] = [];
       const dayTimeSlotCounts = new Map<string, number>(); // Track usage per day-time combo
-      
-      WORKING_DAYS.forEach(day => {
-        timeSlots.forEach(timeSlot => {
+
+      WORKING_DAYS.forEach((day) => {
+        timeSlots.forEach((timeSlot) => {
           if (!isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) {
             const isAM = parseInt(timeSlot.startTime) < 12;
             dayTimeSlots.push({ day, timeSlot, isAM });
-            dayTimeSlotCounts.set(`${day}-${isAM ? 'AM' : 'PM'}`, 0);
+            dayTimeSlotCounts.set(`${day}-${isAM ? "AM" : "PM"}`, 0);
           }
         });
       });
 
       // Find least-loaded day with semester-aware distribution
-      const findLeastLoadedDayForSemester = (semester: number, excludeDays?: Set<string>): WorkingDay | null => {
+      const findLeastLoadedDayForSemester = (
+        semester: number,
+        excludeDays?: Set<string>,
+      ): WorkingDay | null => {
         let bestDay: WorkingDay | null = null;
         let bestScore = Infinity;
         const target = semesterDayTargets.get(semester) || 10;
-        
+
         for (const day of WORKING_DAYS) {
           if (excludeDays?.has(day)) continue;
           const key = `${semester}-${day}`;
           const count = semesterDaySlotCounts.get(key) || 0;
-          
+
           // Prefer days below target, penalize days above target
           const score = Math.abs(count - target);
           if (score < bestScore) {
@@ -472,9 +512,11 @@ export async function registerRoutes(app: Express): Promise<void> {
         }
         return bestDay;
       };
-      
+
       // Find least-loaded day (compact distribution - no AM/PM separation)
-      const findLeastLoadedDay = (excludeDays?: Set<string>): WorkingDay | null => {
+      const findLeastLoadedDay = (
+        excludeDays?: Set<string>,
+      ): WorkingDay | null => {
         let minDay: WorkingDay | null = null;
         let minCount = Infinity;
         for (const day of WORKING_DAYS) {
@@ -490,25 +532,25 @@ export async function registerRoutes(app: Express): Promise<void> {
 
       // Track which courses have been scheduled to prevent scheduling same course twice
       const scheduledCourses = new Set<string>();
-      
+
       // PHASE 1: Schedule ALL theory classes first - prioritize EARLY time slots
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
-        const batchCourses = courses.filter(c => 
-          c.semester === batch.semester && 
-          c.courseType === "theory" && 
-          !scheduledCourses.has(c.id)
+        const batchCourses = courses.filter(
+          (c) =>
+            c.semester === batch.semester &&
+            c.courseType === "theory" &&
+            !scheduledCourses.has(c.id),
         );
-        
+
         for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
           const course = batchCourses[courseIdx];
           const teacher = courseTeachers.get(course.id);
           if (!teacher) continue;
 
           const sessionsNeeded = course.sessionsPerWeek;
-          const suitableRooms = classrooms.filter(r => 
-            r.roomType === "theory" &&
-            r.capacity >= batch.studentCount
+          const suitableRooms = classrooms.filter(
+            (r) => r.roomType === "theory" && r.capacity >= batch.studentCount,
           );
           if (suitableRooms.length === 0) continue;
 
@@ -524,31 +566,37 @@ export async function registerRoutes(app: Express): Promise<void> {
           // ONLY MORNING SLOTS: Skip lunch and afternoon slots
           for (const timeSlot of timeSlots) {
             if (scheduledCount >= sessionsNeeded) break;
-            if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak)) continue;
-            
+            if (isLunchTime(timeSlot.startTime, timeSlot.endTime, lunchBreak))
+              continue;
+
             // Only schedule in morning slots (before lunch starts)
             const slotStartMinutes = timeToMinutes(timeSlot.startTime);
             const lunchStartMinutes = timeToMinutes(lunchBreak.startTime);
             if (slotStartMinutes >= lunchStartMinutes) break; // Skip afternoon slots
-            
+
             // Sort days by class count to balance load
             const sortedDays = [...WORKING_DAYS].sort((a, b) => {
               const countA = daySlotCounts.get(a) || 0;
               const countB = daySlotCounts.get(b) || 0;
               return countA - countB;
             });
-            
+
             for (const day of sortedDays) {
               if (scheduledCount >= sessionsNeeded) break;
-              
+
               const slotKey = `${day}-${timeSlot.id}`;
               const batchSemKey = `${batch.id}-${batch.semester}`;
-              
+
               // STRICT CHECK: This batch+semester cannot have ANY class (theory or lab) at this time
-              if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey)) continue;
+              if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey))
+                continue;
               // SEMESTER-LEVEL CHECK: No other batch in same semester can use this slot
               if (semesterTimeSlots.get(batch.semester)?.has(slotKey)) continue;
-              if (teacherSlots.get(teacher.id)?.has(slotKey) || batchSlots.get(batch.id)?.has(slotKey)) continue;
+              if (
+                teacherSlots.get(teacher.id)?.has(slotKey) ||
+                batchSlots.get(batch.id)?.has(slotKey)
+              )
+                continue;
 
               let availableRoom: Classroom | undefined;
               for (const room of suitableRooms) {
@@ -577,16 +625,20 @@ export async function registerRoutes(app: Express): Promise<void> {
               batchSlots.get(batch.id)?.add(slotKey);
               groupDays.get(groupKey)?.add(day);
               batchTheoryDays.get(batch.id)?.add(day);
-              
+
               // STRICT: Mark this batch-semester-time combo as occupied
-              if (!batchSemesterTimeSlots.has(batchSemKey)) batchSemesterTimeSlots.set(batchSemKey, new Set());
+              if (!batchSemesterTimeSlots.has(batchSemKey))
+                batchSemesterTimeSlots.set(batchSemKey, new Set());
               batchSemesterTimeSlots.get(batchSemKey)?.add(slotKey);
               // STRICT: Mark this time slot as used for entire semester
               semesterTimeSlots.get(batch.semester)?.add(slotKey);
-              
+
               daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 1);
               const semKey = `${batch.semester}-${day}`;
-              semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 1);
+              semesterDaySlotCounts.set(
+                semKey,
+                (semesterDaySlotCounts.get(semKey) || 0) + 1,
+              );
 
               scheduledCount++;
               scheduledCourses.add(course.id);
@@ -598,12 +650,13 @@ export async function registerRoutes(app: Express): Promise<void> {
       // PHASE 2: Schedule lab classes - on different days from theory when possible
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
-        const batchCourses = courses.filter(c => 
-          c.semester === batch.semester && 
-          c.courseType === "lab" && 
-          !scheduledCourses.has(c.id)
+        const batchCourses = courses.filter(
+          (c) =>
+            c.semester === batch.semester &&
+            c.courseType === "lab" &&
+            !scheduledCourses.has(c.id),
         );
-        
+
         for (let courseIdx = 0; courseIdx < batchCourses.length; courseIdx++) {
           const course = batchCourses[courseIdx];
           const teacher = courseTeachers.get(course.id);
@@ -613,9 +666,13 @@ export async function registerRoutes(app: Express): Promise<void> {
           const sessionsNeeded = course.sessionsPerWeek;
 
           // Find suitable rooms
-          const suitableRooms = classrooms.filter(r => 
-            r.roomType === "lab" &&
-            r.capacity >= (needsSplit ? Math.ceil(batch.studentCount / 2) : batch.studentCount)
+          const suitableRooms = classrooms.filter(
+            (r) =>
+              r.roomType === "lab" &&
+              r.capacity >=
+                (needsSplit
+                  ? Math.ceil(batch.studentCount / 2)
+                  : batch.studentCount),
           );
 
           if (suitableRooms.length === 0) continue;
@@ -624,7 +681,10 @@ export async function registerRoutes(app: Express): Promise<void> {
             // Lab: >25 students - split into groups A and B on different days
             // PRIORITIZE EARLY TIME SLOTS: Loop through time slots first, then days
             const groups = ["A", "B"];
-            const usedGroupDays = { A: new Set<string>(), B: new Set<string>() };
+            const usedGroupDays = {
+              A: new Set<string>(),
+              B: new Set<string>(),
+            };
             const batchSemKey = `${batch.id}-${batch.semester}`;
 
             for (const group of groups) {
@@ -635,20 +695,28 @@ export async function registerRoutes(app: Express): Promise<void> {
               }
 
               let scheduledCount = 0;
-              const usedLabTimeSlots = batchSemesterLabTimeSlots.get(batchSemKey) || new Set();
-              
+              const usedLabTimeSlots =
+                batchSemesterLabTimeSlots.get(batchSemKey) || new Set();
+
               // Loop through time slot PAIRS first (earliest to latest), then days
               // PRIORITY: Morning slots first, then afternoon slots if needed
               for (let i = 0; i < timeSlots.length - 1; i++) {
                 if (scheduledCount >= sessionsNeeded) break;
-                
+
                 const slot1 = timeSlots[i];
                 const slot2 = timeSlots[i + 1];
-                if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
-                    isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
+                if (
+                  isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
+                  isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)
+                )
+                  continue;
 
                 // Skip if these time slots already have labs for this batch-semester
-                if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
+                if (
+                  usedLabTimeSlots.has(slot1.id) ||
+                  usedLabTimeSlots.has(slot2.id)
+                )
+                  continue;
 
                 // Sort days by class count to balance load, prefer days group hasn't used
                 const sortedDays = [...WORKING_DAYS].sort((a, b) => {
@@ -659,7 +727,7 @@ export async function registerRoutes(app: Express): Promise<void> {
 
                 for (const day of sortedDays) {
                   if (scheduledCount >= sessionsNeeded) break;
-                  
+
                   // Skip if group already used this day
                   if (usedGroupDays[group].has(day)) continue;
                   // For group B, skip days used by group A to spread across different days
@@ -669,15 +737,34 @@ export async function registerRoutes(app: Express): Promise<void> {
                   const slotKey2 = `${day}-${slot2.id}`;
 
                   // STRICT CHECK: Cannot use if batch-semester already has class at this time (theory or lab)
-                  if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) || batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)) continue;
+                  if (
+                    batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) ||
+                    batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)
+                  )
+                    continue;
                   // SEMESTER-LEVEL CHECK: No other batch in same semester can use these slots
-                  if (semesterTimeSlots.get(batch.semester)?.has(slotKey1) || semesterTimeSlots.get(batch.semester)?.has(slotKey2)) continue;
-                  if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
-                  if (batchSlots.get(batch.id)?.has(slotKey1) || batchSlots.get(batch.id)?.has(slotKey2)) continue;
+                  if (
+                    semesterTimeSlots.get(batch.semester)?.has(slotKey1) ||
+                    semesterTimeSlots.get(batch.semester)?.has(slotKey2)
+                  )
+                    continue;
+                  if (
+                    teacherSlots.get(teacher.id)?.has(slotKey1) ||
+                    teacherSlots.get(teacher.id)?.has(slotKey2)
+                  )
+                    continue;
+                  if (
+                    batchSlots.get(batch.id)?.has(slotKey1) ||
+                    batchSlots.get(batch.id)?.has(slotKey2)
+                  )
+                    continue;
 
                   let availableRoom: Classroom | undefined;
                   for (const room of suitableRooms) {
-                    if (!roomSlots.get(room.id)?.has(slotKey1) && !roomSlots.get(room.id)?.has(slotKey2)) {
+                    if (
+                      !roomSlots.get(room.id)?.has(slotKey1) &&
+                      !roomSlots.get(room.id)?.has(slotKey2)
+                    ) {
                       availableRoom = room;
                       break;
                     }
@@ -706,14 +793,14 @@ export async function registerRoutes(app: Express): Promise<void> {
                   groupDays.get(groupKey)?.add(day);
                   usedGroupDays[group].add(day);
                   batchLabDays.get(batch.id)?.add(day);
-                  
+
                   // Track time slots used by labs for this batch-semester
                   if (!batchSemesterLabTimeSlots.has(batchSemKey)) {
                     batchSemesterLabTimeSlots.set(batchSemKey, new Set());
                   }
                   batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot1.id);
                   batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
-                  
+
                   // STRICT: Mark these times as occupied for this batch-semester
                   if (!batchSemesterTimeSlots.has(batchSemKey)) {
                     batchSemesterTimeSlots.set(batchSemKey, new Set());
@@ -723,11 +810,14 @@ export async function registerRoutes(app: Express): Promise<void> {
                   // STRICT: Mark these times as used for entire semester
                   semesterTimeSlots.get(batch.semester)?.add(slotKey1);
                   semesterTimeSlots.get(batch.semester)?.add(slotKey2);
-                  
+
                   daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 2);
                   const semKey = `${batch.semester}-${day}`;
-                  semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 2);
-                  
+                  semesterDaySlotCounts.set(
+                    semKey,
+                    (semesterDaySlotCounts.get(semKey) || 0) + 2,
+                  );
+
                   scheduledCount++;
                 }
               }
@@ -742,22 +832,31 @@ export async function registerRoutes(app: Express): Promise<void> {
             }
 
             const usedDays = new Set<string>();
-            const usedLabTimeSlots = batchSemesterLabTimeSlots.get(`${batch.id}-${batch.semester}`) || new Set();
+            const usedLabTimeSlots =
+              batchSemesterLabTimeSlots.get(`${batch.id}-${batch.semester}`) ||
+              new Set();
             const batchSemKey = `${batch.id}-${batch.semester}`;
-            
+
             let scheduledCount = 0;
             // Loop through time slot PAIRS first (earliest to latest), then days
             // PRIORITY: Morning slots first, then afternoon slots if needed
             for (let i = 0; i < timeSlots.length - 1; i++) {
               if (scheduledCount >= sessionsNeeded) break;
-              
+
               const slot1 = timeSlots[i];
               const slot2 = timeSlots[i + 1];
-              if (isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
-                  isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)) continue;
+              if (
+                isLunchTime(slot1.startTime, slot1.endTime, lunchBreak) ||
+                isLunchTime(slot2.startTime, slot2.endTime, lunchBreak)
+              )
+                continue;
 
               // Skip if these time slots already have labs for this batch-semester
-              if (usedLabTimeSlots.has(slot1.id) || usedLabTimeSlots.has(slot2.id)) continue;
+              if (
+                usedLabTimeSlots.has(slot1.id) ||
+                usedLabTimeSlots.has(slot2.id)
+              )
+                continue;
 
               // Sort days by class count to balance load
               const sortedDays = [...WORKING_DAYS].sort((a, b) => {
@@ -774,15 +873,34 @@ export async function registerRoutes(app: Express): Promise<void> {
                 const slotKey2 = `${day}-${slot2.id}`;
 
                 // STRICT CHECK: Cannot use if batch-semester already has class at this time (theory or lab)
-                if (batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) || batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)) continue;
+                if (
+                  batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey1) ||
+                  batchSemesterTimeSlots.get(batchSemKey)?.has(slotKey2)
+                )
+                  continue;
                 // SEMESTER-LEVEL CHECK: No other batch in same semester can use these slots
-                if (semesterTimeSlots.get(batch.semester)?.has(slotKey1) || semesterTimeSlots.get(batch.semester)?.has(slotKey2)) continue;
-                if (teacherSlots.get(teacher.id)?.has(slotKey1) || teacherSlots.get(teacher.id)?.has(slotKey2)) continue;
-                if (batchSlots.get(batch.id)?.has(slotKey1) || batchSlots.get(batch.id)?.has(slotKey2)) continue;
+                if (
+                  semesterTimeSlots.get(batch.semester)?.has(slotKey1) ||
+                  semesterTimeSlots.get(batch.semester)?.has(slotKey2)
+                )
+                  continue;
+                if (
+                  teacherSlots.get(teacher.id)?.has(slotKey1) ||
+                  teacherSlots.get(teacher.id)?.has(slotKey2)
+                )
+                  continue;
+                if (
+                  batchSlots.get(batch.id)?.has(slotKey1) ||
+                  batchSlots.get(batch.id)?.has(slotKey2)
+                )
+                  continue;
 
                 let availableRoom: Classroom | undefined;
                 for (const room of suitableRooms) {
-                  if (!roomSlots.get(room.id)?.has(slotKey1) && !roomSlots.get(room.id)?.has(slotKey2)) {
+                  if (
+                    !roomSlots.get(room.id)?.has(slotKey1) &&
+                    !roomSlots.get(room.id)?.has(slotKey2)
+                  ) {
                     availableRoom = room;
                     break;
                   }
@@ -811,14 +929,14 @@ export async function registerRoutes(app: Express): Promise<void> {
                 groupDays.get(groupKey)?.add(day);
                 usedDays.add(day);
                 batchLabDays.get(batch.id)?.add(day);
-                
+
                 // Track time slots used by labs for this batch-semester
                 if (!batchSemesterLabTimeSlots.has(batchSemKey)) {
                   batchSemesterLabTimeSlots.set(batchSemKey, new Set());
                 }
                 batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot1.id);
                 batchSemesterLabTimeSlots.get(batchSemKey)?.add(slot2.id);
-                
+
                 // STRICT: Mark these times as occupied for this batch-semester
                 if (!batchSemesterTimeSlots.has(batchSemKey)) {
                   batchSemesterTimeSlots.set(batchSemKey, new Set());
@@ -828,11 +946,14 @@ export async function registerRoutes(app: Express): Promise<void> {
                 // STRICT: Mark these times as used for entire semester
                 semesterTimeSlots.get(batch.semester)?.add(slotKey1);
                 semesterTimeSlots.get(batch.semester)?.add(slotKey2);
-                
+
                 daySlotCounts.set(day, (daySlotCounts.get(day) || 0) + 2);
                 const semKey = `${batch.semester}-${day}`;
-                semesterDaySlotCounts.set(semKey, (semesterDaySlotCounts.get(semKey) || 0) + 2);
-                
+                semesterDaySlotCounts.set(
+                  semKey,
+                  (semesterDaySlotCounts.get(semKey) || 0) + 2,
+                );
+
                 scheduledCount++;
               }
             }
@@ -844,7 +965,9 @@ export async function registerRoutes(app: Express): Promise<void> {
       res.json(entries);
     } catch (error: any) {
       console.error("Schedule generation error:", error);
-      res.status(500).json({ message: error.message || "Failed to generate schedule" });
+      res
+        .status(500)
+        .json({ message: error.message || "Failed to generate schedule" });
     }
   });
 
@@ -863,11 +986,13 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post("/api/lunch-break", async (req, res) => {
     try {
       const { startTime, endTime, enabled } = req.body;
-      
+
       if (!startTime || !endTime || enabled === undefined) {
-        return res.status(400).json({ message: "startTime, endTime, and enabled are required" });
+        return res
+          .status(400)
+          .json({ message: "startTime, endTime, and enabled are required" });
       }
-      
+
       const lunchBreak = await storage.setLunchBreak({
         startTime,
         endTime,
@@ -902,8 +1027,10 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post("/api/sessions/create", async (req, res) => {
     try {
       const { sessionName } = req.body;
-      if (!sessionName || typeof sessionName !== 'string') {
-        return res.status(400).json({ message: "sessionName is required and must be a string" });
+      if (!sessionName || typeof sessionName !== "string") {
+        return res
+          .status(400)
+          .json({ message: "sessionName is required and must be a string" });
       }
       const session = await storage.addSession(sessionName);
       res.status(201).json(session);
@@ -916,12 +1043,16 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const { id } = req.params;
       const { sessionName } = req.body;
-      if (!sessionName || typeof sessionName !== 'string') {
-        return res.status(400).json({ message: "sessionName is required and must be a string" });
+      if (!sessionName || typeof sessionName !== "string") {
+        return res
+          .status(400)
+          .json({ message: "sessionName is required and must be a string" });
       }
       const trimmedName = sessionName.trim();
       if (!trimmedName) {
-        return res.status(400).json({ message: "Session name cannot be empty" });
+        return res
+          .status(400)
+          .json({ message: "Session name cannot be empty" });
       }
       const session = await storage.updateSession(id, trimmedName);
       res.json(session);
