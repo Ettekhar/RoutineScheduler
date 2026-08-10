@@ -191,6 +191,12 @@ export class MemStorage implements IStorage {
       path.resolve(process.cwd(), "storage.json"),
       path.resolve(process.cwd(), "..", "storage.json"),
       path.resolve(process.cwd(), "server", "..", "storage.json"),
+      // Vercel serverless: __dirname is dist/, storage.json is at project root
+      typeof __dirname !== "undefined"
+        ? path.resolve(__dirname, "..", "storage.json")
+        : null,
+      // Explicit Vercel path
+      "/var/task/storage.json",
     ].filter((value): value is string => Boolean(value));
 
     for (const candidate of candidates) {
