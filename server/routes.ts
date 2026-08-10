@@ -1,5 +1,4 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
   insertTeacherSchema, 
@@ -30,10 +29,7 @@ function isLunchTime(slotStart: string, slotEnd: string, lunchBreak: LunchBreakC
   return slotStartMin < lunchEndMin && slotEndMin > lunchStartMin;
 }
 
-export async function registerRoutes(
-  httpServer: Server,
-  app: Express
-): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<void> {
   
   // Teachers CRUD
   app.get("/api/teachers", async (req, res) => {
@@ -946,6 +942,4 @@ export async function registerRoutes(
       res.status(400).json({ message: error.message });
     }
   });
-
-  return httpServer;
 }
