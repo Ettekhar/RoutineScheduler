@@ -6,3 +6,8 @@ vite.config.ts.*
 *.tar.gz
 .vercel
 .env*
+
+# Replit-specific files (not needed for Vercel deployment)
+.local/
+.replit
+replit.md
