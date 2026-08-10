@@ -18,6 +18,8 @@ import {
   type LunchBreakConfig,
   DEFAULT_TIME_SLOTS,
 } from "@shared/schema";
+import fs from "fs/promises";
+import path from "path";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -84,6 +86,19 @@ export interface IStorage {
   clearScheduleForSession(sessionName: string): Promise<void>;
 }
 
+interface StorageState {
+  users: User[];
+  teachers: Teacher[];
+  courses: Course[];
+  batches: Batch[];
+  classrooms: Classroom[];
+  timeSlots: TimeSlot[];
+  scheduleEntries: ScheduleEntry[];
+  lunchBreak: LunchBreakConfig;
+  sessions: Array<{ id: string; name: string }>;
+  currentSession: string;
+}
+
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private teachers: Map<string, Teacher>;
@@ -95,8 +110,12 @@ export class MemStorage implements IStorage {
   private lunchBreak: LunchBreakConfig;
   private sessions: Map<string, { id: string; name: string }>;
   private currentSession: string;
+  private storageFilePath: string;
+  private persistEnabled: boolean;
 
   constructor() {
+    this.storageFilePath = path.resolve(process.cwd(), "storage.json");
+    this.persistEnabled = true;
     this.users = new Map();
     this.teachers = new Map();
     this.courses = new Map();
@@ -133,6 +152,68 @@ export class MemStorage implements IStorage {
     });
   }
 
+  private serialize(): StorageState {
+    return {
+      users: Array.from(this.users.values()),
+      teachers: Array.from(this.teachers.values()),
+      courses: Array.from(this.courses.values()),
+      batches: Array.from(this.batches.values()),
+      classrooms: Array.from(this.classrooms.values()),
+      timeSlots: Array.from(this.timeSlots.values()),
+      scheduleEntries: Array.from(this.scheduleEntries.values()),
+      lunchBreak: this.lunchBreak,
+      sessions: Array.from(this.sessions.values()),
+      currentSession: this.currentSession,
+    };
+  }
+
+  private restore(state: StorageState) {
+    this.users = new Map(state.users.map((item) => [item.id, item]));
+    this.teachers = new Map(state.teachers.map((item) => [item.id, item]));
+    this.courses = new Map(state.courses.map((item) => [item.id, item]));
+    this.batches = new Map(state.batches.map((item) => [item.id, item]));
+    this.classrooms = new Map(state.classrooms.map((item) => [item.id, item]));
+    this.timeSlots = new Map(state.timeSlots.map((item) => [item.id, item]));
+    this.scheduleEntries = new Map(state.scheduleEntries.map((item) => [item.id, item]));
+    this.lunchBreak = state.lunchBreak;
+    this.sessions = new Map(state.sessions.map((item) => [item.id, item]));
+    this.currentSession = state.currentSession;
+  }
+
+  private async persist(): Promise<void> {
+    if (!this.persistEnabled) return;
+    await fs.writeFile(this.storageFilePath, JSON.stringify(this.serialize(), null, 2), "utf-8");
+  }
+
+  private async load(): Promise<void> {
+    try {
+      const raw = await fs.readFile(this.storageFilePath, "utf-8");
+      const data = JSON.parse(raw) as StorageState;
+      this.restore(data);
+    } catch (error: any) {
+      if (error.code === "ENOENT") {
+        return;
+      }
+      throw error;
+    }
+  }
+
+  async initialize(): Promise<void> {
+    try {
+      await fs.access(this.storageFilePath);
+      await this.load();
+    } catch (error: any) {
+      if (error.code === "ENOENT") {
+        this.persistEnabled = false;
+        await initializeSampleData();
+        this.persistEnabled = true;
+        await this.persist();
+        return;
+      }
+      throw error;
+    }
+  }
+
   // Users
   async getUser(id: string): Promise<User | undefined> {
     return this.users.get(id);
@@ -148,6 +229,7 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
+    await this.persist();
     return user;
   }
 
@@ -169,6 +251,7 @@ export class MemStorage implements IStorage {
       maxLoad: insertTeacher.maxLoad || 18,
     };
     this.teachers.set(id, teacher);
+    await this.persist();
     return teacher;
   }
 
@@ -178,11 +261,14 @@ export class MemStorage implements IStorage {
     
     const updated: Teacher = { ...teacher, ...updates };
     this.teachers.set(id, updated);
+    await this.persist();
     return updated;
   }
 
   async deleteTeacher(id: string): Promise<boolean> {
-    return this.teachers.delete(id);
+    const deleted = this.teachers.delete(id);
+    if (deleted) await this.persist();
+    return deleted;
   }
 
   // Courses
@@ -202,6 +288,7 @@ export class MemStorage implements IStorage {
       sessionsPerWeek: insertCourse.sessionsPerWeek || 1,
     };
     this.courses.set(id, course);
+    await this.persist();
     return course;
   }
 
@@ -211,11 +298,14 @@ export class MemStorage implements IStorage {
     
     const updated: Course = { ...course, ...updates };
     this.courses.set(id, updated);
+    await this.persist();
     return updated;
   }
 
   async deleteCourse(id: string): Promise<boolean> {
-    return this.courses.delete(id);
+    const deleted = this.courses.delete(id);
+    if (deleted) await this.persist();
+    return deleted;
   }
 
   // Batches
@@ -235,6 +325,7 @@ export class MemStorage implements IStorage {
       section: insertBatch.section || "A",
     };
     this.batches.set(id, batch);
+    await this.persist();
     return batch;
   }
 
@@ -244,11 +335,14 @@ export class MemStorage implements IStorage {
     
     const updated: Batch = { ...batch, ...updates };
     this.batches.set(id, updated);
+    await this.persist();
     return updated;
   }
 
   async deleteBatch(id: string): Promise<boolean> {
-    return this.batches.delete(id);
+    const deleted = this.batches.delete(id);
+    if (deleted) await this.persist();
+    return deleted;
   }
 
   // Classrooms
@@ -268,6 +362,7 @@ export class MemStorage implements IStorage {
       building: insertClassroom.building || "Main",
     };
     this.classrooms.set(id, classroom);
+    await this.persist();
     return classroom;
   }
 
@@ -277,11 +372,14 @@ export class MemStorage implements IStorage {
     
     const updated: Classroom = { ...classroom, ...updates };
     this.classrooms.set(id, updated);
+    await this.persist();
     return updated;
   }
 
   async deleteClassroom(id: string): Promise<boolean> {
-    return this.classrooms.delete(id);
+    const deleted = this.classrooms.delete(id);
+    if (deleted) await this.persist();
+    return deleted;
   }
 
   // Time Slots
@@ -347,7 +445,7 @@ export class MemStorage implements IStorage {
         currentLoad: teacher.currentLoad + 1 
       } as any);
     }
-    
+    await this.persist();
     return entry;
   }
 
@@ -374,6 +472,7 @@ export class MemStorage implements IStorage {
     
     const updated: ScheduleEntry = { ...entry, ...updates };
     this.scheduleEntries.set(id, updated);
+    await this.persist();
     return updated;
   }
 
@@ -388,7 +487,9 @@ export class MemStorage implements IStorage {
         } as any);
       }
     }
-    return this.scheduleEntries.delete(id);
+    const deleted = this.scheduleEntries.delete(id);
+    if (deleted) await this.persist();
+    return deleted;
   }
 
   async clearSchedule(): Promise<void> {
@@ -397,6 +498,7 @@ export class MemStorage implements IStorage {
       teacher.currentLoad = 0;
     }
     this.scheduleEntries.clear();
+    await this.persist();
   }
 
   async clearScheduleForSession(sessionName: string): Promise<void> {
@@ -416,6 +518,7 @@ export class MemStorage implements IStorage {
     for (const entry of entries) {
       this.scheduleEntries.delete(entry.id);
     }
+    await this.persist();
   }
 
   // Stats
@@ -441,6 +544,7 @@ export class MemStorage implements IStorage {
 
   async setLunchBreak(config: LunchBreakConfig): Promise<LunchBreakConfig> {
     this.lunchBreak = config;
+    await this.persist();
     return this.lunchBreak;
   }
 
@@ -455,6 +559,7 @@ export class MemStorage implements IStorage {
 
   async setCurrentSession(sessionName: string): Promise<string> {
     this.currentSession = sessionName;
+    await this.persist();
     return this.currentSession;
   }
 
@@ -468,6 +573,7 @@ export class MemStorage implements IStorage {
     const id = `session-${sessionName.toLowerCase().replace(/\s+/g, '-')}`;
     const session = { id, name: sessionName };
     this.sessions.set(id, session);
+    await this.persist();
     return session;
   }
 
@@ -492,6 +598,7 @@ export class MemStorage implements IStorage {
 
     session.name = newName;
     this.sessions.set(id, session);
+    await this.persist();
     return session;
   }
 
@@ -519,7 +626,9 @@ export class MemStorage implements IStorage {
       this.scheduleEntries.delete(entryId);
     }
 
-    return this.sessions.delete(id);
+    const deleted = this.sessions.delete(id);
+    if (deleted) await this.persist();
+    return deleted;
   }
 }
 

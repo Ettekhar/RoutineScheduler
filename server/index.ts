@@ -2,7 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import { initializeSampleData } from "./storage";
+import { storage } from "./storage";
 
 const app = express();
 const httpServer = createServer(app);
@@ -61,9 +61,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize sample data
-  await initializeSampleData();
-  
+  await storage.initialize();
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
