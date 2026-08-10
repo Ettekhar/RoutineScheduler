@@ -1,5 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { createServer } from "http";
+import fs from "fs";
+import path from "path";
 import { createApp } from "./app";
 import { serveStatic } from "./static";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
@@ -22,7 +24,43 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+function sendAsset(req: VercelRequest, res: VercelResponse): boolean {
+  const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
+  if (!pathname.startsWith("/api/assets/")) {
+    return false;
+  }
+
+  const relativePath = pathname.replace(/^\/api\/assets\//, "");
+  const assetPath = path.resolve(path.join(process.cwd(), "dist", "public", relativePath));
+  const publicRoot = path.resolve(process.cwd(), "dist", "public");
+
+  if (!assetPath.startsWith(publicRoot) || !fs.existsSync(assetPath)) {
+    res.status(404).send("Not Found");
+    return true;
+  }
+
+  const extension = path.extname(assetPath).toLowerCase();
+  const contentType =
+    extension === ".js"
+      ? "application/javascript; charset=utf-8"
+      : extension === ".css"
+        ? "text/css; charset=utf-8"
+        : extension === ".json"
+          ? "application/json; charset=utf-8"
+          : extension === ".svg"
+            ? "image/svg+xml"
+            : "application/octet-stream";
+
+  res.setHeader("Content-Type", contentType);
+  res.sendFile(assetPath);
+  return true;
+}
+
 export async function handler(req: VercelRequest, res: VercelResponse) {
+  if (sendAsset(req, res)) {
+    return;
+  }
+
   const app = await createApp();
   return new Promise<void>((resolve) => {
     app(req as any, res as any, () => {
@@ -57,9 +95,10 @@ async function startServer() {
   );
 }
 
-const isMain = process.argv[1]
-  ? import.meta.url === pathToFileURL(process.argv[1]).href
-  : false;
+const isMain =
+  typeof __filename !== "undefined" &&
+  !!process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(__filename);
 
 if (isMain) {
   startServer().catch((err: unknown) => {
