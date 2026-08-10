@@ -4,4 +4,4 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
-storage.json
+# storage.json intentionally committed for production seed data
