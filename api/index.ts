@@ -1,16 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createApp } from "../server/app";
-
-const appPromise = createApp();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const app = await appPromise;
-  return new Promise<void>((resolve) => {
-    app(req, res, () => {
-      if (!res.writableEnded) {
-        res.status(404).send("Not Found");
-      }
-      resolve();
-    });
-  });
+  const mod = await import("../dist/index.cjs");
+  const serverHandler = (mod as { handler?: (req: VercelRequest, res: VercelResponse) => Promise<unknown> }).handler;
+
+  if (typeof serverHandler !== "function") {
+    throw new Error("The built server entrypoint did not export a handler");
+  }
+
+  return serverHandler(req, res);
 }
