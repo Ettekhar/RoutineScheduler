@@ -1,0 +1,1135 @@
+{
+  "users": [],
+  "teachers": [
+    {
+      "name": "Prof. Usman Farooq",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "79091fa6-e198-4845-acb7-dcccf7f97c37",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Fatima Tariq",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "8f64cf3a-2bc2-4371-915c-4846818dc1bf",
+      "currentLoad": 0
+    },
+    {
+      "name": "Mr. Salim Baig",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "360343eb-1bdb-4b74-87f4-40e18d08d327",
+      "currentLoad": 0
+    },
+    {
+      "name": "Prof. Rashid Malik",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "7f49539b-7edd-4ae0-ada8-5bf41393f425",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Rohan K. Patel",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "3a95f19e-6f73-40be-8129-a4be5dd122b6",
+      "currentLoad": 0
+    },
+    {
+      "name": "Mr. Tariq Samad",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "86dca805-a577-44e1-b305-34ff82ef019e",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Anil Das",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "f35001cb-f898-4944-b963-8844ea7d9bf6",
+      "currentLoad": 0
+    },
+    {
+      "name": "Prof. Ravi Anand",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "fa738004-4e95-4163-805b-43d8e79292cc",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Sarah Ali",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "21effbcc-c9af-402a-b6e6-11851eaf3880",
+      "currentLoad": 0
+    },
+    {
+      "name": "Ms. Tanya Ahmed",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "16866c81-3c1b-4d21-9304-c96a4663c990",
+      "currentLoad": 0
+    },
+    {
+      "name": "Prof. David S. Roy",
+      "designation": "Associate Professor",
+      "department": "Science",
+      "maxLoad": 20,
+      "id": "5d7bdbf8-5566-4e7c-af99-2e6c77aa2392",
+      "currentLoad": 0
+    },
+    {
+      "name": "Mr. Mahmood Ahmad",
+      "designation": "Associate Professor",
+      "department": "Humanities",
+      "maxLoad": 20,
+      "id": "223d5864-27be-41a1-846d-a29416f4e6cb",
+      "currentLoad": 0
+    },
+    {
+      "name": "Ms. Nadia Malik",
+      "designation": "Associate Professor",
+      "department": "Humanities",
+      "maxLoad": 20,
+      "id": "32aed539-20c8-4b1b-a76e-ef91990087a2",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Dinesh K. Ghai",
+      "designation": "Associate Professor",
+      "department": "EEE",
+      "maxLoad": 20,
+      "id": "46b87e35-f70a-46de-a06a-5e59374d2119",
+      "currentLoad": 0
+    },
+    {
+      "name": "Mr. Karan Bhat",
+      "designation": "Associate Professor",
+      "department": "EEE",
+      "maxLoad": 20,
+      "id": "f81d8511-333d-4d27-b68e-a2a413c2b7c6",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Shweta Iyer",
+      "designation": "Associate Professor",
+      "department": "SE",
+      "maxLoad": 20,
+      "id": "7c251882-0b7a-43e8-94d8-8bda9fa645fc",
+      "currentLoad": 0
+    },
+    {
+      "name": "Ms. Swati Singh",
+      "designation": "Associate Professor",
+      "department": "Math",
+      "maxLoad": 20,
+      "id": "2ceb7ac3-d28e-46f0-8faf-58ab52fd4b17",
+      "currentLoad": 0
+    },
+    {
+      "name": "Mr. Nikhil Kant",
+      "designation": "Associate Professor",
+      "department": "Humanities",
+      "maxLoad": 20,
+      "id": "9333a4e5-143d-45c4-a776-1289082c6eaf",
+      "currentLoad": 0
+    },
+    {
+      "name": "Prof. Anu Nair",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "078d687d-c669-44e1-8bc9-9f82a799f33e",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Arjun Roy",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "4f4d69a4-6c69-49e7-9698-b8d761d8bcd1",
+      "currentLoad": 0
+    },
+    {
+      "name": "Ms. Usha Hariom",
+      "designation": "Associate Professor",
+      "department": "Math",
+      "maxLoad": 20,
+      "id": "26cb8d11-583f-48ea-bb22-ce2721d12ba5",
+      "currentLoad": 0
+    },
+    {
+      "name": "Prof. Keshav E. Rao",
+      "designation": "Associate Professor",
+      "department": "Math",
+      "maxLoad": 20,
+      "id": "6d1b7014-13d4-416e-aacc-67ca1dd10fba",
+      "currentLoad": 0
+    },
+    {
+      "name": "Mr. Sharad Hari",
+      "designation": "Associate Professor",
+      "department": "Economics",
+      "maxLoad": 20,
+      "id": "f778c73b-1f35-41df-8e0a-dc50040b9b54",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Suresh Hari",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "e328a60e-4e46-4cd5-b51e-78c5b4b161bd",
+      "currentLoad": 0
+    },
+    {
+      "name": "Ms. Meera Shah",
+      "designation": "Associate Professor",
+      "department": "Math",
+      "maxLoad": 20,
+      "id": "ab475cc0-4e68-4edb-a0f6-ca53b46bb5f9",
+      "currentLoad": 0
+    },
+    {
+      "name": "Mr. Mohan S. Upadhyay",
+      "designation": "Associate Professor",
+      "department": "Math",
+      "maxLoad": 20,
+      "id": "5313e2ba-9dcd-4b8d-9664-808e3f82f56f",
+      "currentLoad": 0
+    },
+    {
+      "name": "Prof. Amit Mishra",
+      "designation": "Associate Professor",
+      "department": "Business",
+      "maxLoad": 20,
+      "id": "4d0aab70-3d92-4f96-94cd-3f1a99c9ccd0",
+      "currentLoad": 0
+    },
+    {
+      "name": "Dr. Manish K. Negi",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "be294c6a-f7bd-4c9f-8a00-f826dceeff03",
+      "currentLoad": 0
+    },
+    {
+      "name": "Ms. Farida Ibrahim",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "737563ff-65fd-4c8b-bf58-5acc9dc4ed24",
+      "currentLoad": 0
+    },
+    {
+      "name": "Mr. Jaswant Firdaus",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "62a04738-b0db-4f8c-a0eb-0d45a47fae7d",
+      "currentLoad": 0
+    },
+    {
+      "name": "Prof. Brijesh S. Singh",
+      "designation": "Associate Professor",
+      "department": "CSE",
+      "maxLoad": 20,
+      "id": "a23c7d4d-d7b7-4a7f-81f9-6185ba55e14b",
+      "currentLoad": 0
+    }
+  ],
+  "courses": [
+    {
+      "code": "CSE1101",
+      "name": "Introduction to Computer Systems",
+      "semester": 1,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "2117a2a6-2a3e-454e-ad23-db7d19ed2d34"
+    },
+    {
+      "code": "CSE1102",
+      "name": "Structured Programming Language",
+      "semester": 1,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "6350d812-459a-47e3-be8b-a032f7a38209"
+    },
+    {
+      "code": "CSE1103L",
+      "name": "Structured Programming Language Lab",
+      "semester": 1,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "be2f9c35-b8a9-414a-989c-5a5d564c1e8a"
+    },
+    {
+      "code": "MAT1104",
+      "name": "Math-I (Calculus)",
+      "semester": 1,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "54a88246-c448-43d0-bce3-88ecfec9591d"
+    },
+    {
+      "code": "PHY1105",
+      "name": "Physics (Electricity, Magnetism & Optics)",
+      "semester": 1,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "f36d9de9-a1a0-414e-b731-b7233669eb7b"
+    },
+    {
+      "code": "ENV1106",
+      "name": "Environmental Science",
+      "semester": 1,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "79593ed4-3ef3-4c20-b55c-eef3c825b477"
+    },
+    {
+      "code": "ENG1107",
+      "name": "English Reading & Public Speaking",
+      "semester": 1,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "6de777c3-09b7-4c1b-9796-be48e84d9156"
+    },
+    {
+      "code": "BAN1108",
+      "name": "Bengali",
+      "semester": 1,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "6deabde1-d1d8-4c82-a97d-06844f31d9c7"
+    },
+    {
+      "code": "CSE1201",
+      "name": "Object Oriented Programming (C++)",
+      "semester": 2,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "02102f9c-5c14-4326-8f4a-9a484e1ad1c8"
+    },
+    {
+      "code": "CSE1202L",
+      "name": "OOP (C++) Lab",
+      "semester": 2,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "b881d519-5f12-4198-93df-578609361409"
+    },
+    {
+      "code": "EEE1203",
+      "name": "Electrical & Electronics Circuits",
+      "semester": 2,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "6c90323c-76f1-4110-99e0-8e18d92f1f92"
+    },
+    {
+      "code": "EEE1204L",
+      "name": "Electrical & Electronics Circuits Lab",
+      "semester": 2,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "61222c49-c5ec-4e69-8821-0bb8dbb6ae8c"
+    },
+    {
+      "code": "SE1205L",
+      "name": "Engineering Drawing & CAD Lab",
+      "semester": 2,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "0b9b1850-5286-4048-b1af-389cf78b1dc7"
+    },
+    {
+      "code": "MAT1206",
+      "name": "Discrete Mathematics",
+      "semester": 2,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "adddbbb9-5caf-4952-abc7-5e0e7601eaba"
+    },
+    {
+      "code": "MAT1207",
+      "name": "Math-II (Co-ordinate Geometry & Vector Analysis)",
+      "semester": 2,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "759851f1-cc97-4032-9d17-bb3ac1fdc3c4"
+    },
+    {
+      "code": "ENG1208",
+      "name": "English Writing & Communication",
+      "semester": 2,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "1b9ed02d-cd4f-4153-8658-e021d3281245"
+    },
+    {
+      "code": "CSE2301",
+      "name": "Data Structures",
+      "semester": 3,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "68e8e642-5704-4141-8075-580612cbbf73"
+    },
+    {
+      "code": "CSE2302L",
+      "name": "Data Structures Lab",
+      "semester": 3,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "c709409c-0499-4f4b-b2d9-5e91ab9f8a6b"
+    },
+    {
+      "code": "CSE2303",
+      "name": "Digital Logic & System Design",
+      "semester": 3,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "7f78a7c9-63f3-4795-b901-173c814a6f35"
+    },
+    {
+      "code": "CSE2304L",
+      "name": "Digital Logic & System Design Lab",
+      "semester": 3,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "c24c2e67-bde1-4ba4-9f02-87e3ef70f108"
+    },
+    {
+      "code": "STA2305",
+      "name": "Statistics & Probability",
+      "semester": 3,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "f96f27a2-c7db-4663-aa9e-1dfd9c4aa34b"
+    },
+    {
+      "code": "MAT2306",
+      "name": "Math-III (Differential Equation & Special Function)",
+      "semester": 3,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "234c1e38-f461-4416-81cb-54276025f2e8"
+    },
+    {
+      "code": "ECO2307",
+      "name": "Industrial Economics",
+      "semester": 3,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "41134c01-9409-4bdb-be63-f77411a0c022"
+    },
+    {
+      "code": "PG2308",
+      "name": "Liberation War of Bangladesh",
+      "semester": 3,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "86ed9d72-5de7-443c-ada8-622175ba793f"
+    },
+    {
+      "code": "CSE2401",
+      "name": "Algorithm",
+      "semester": 4,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "01a6ae4a-e127-4d58-be90-f59340ce879e"
+    },
+    {
+      "code": "CSE2402L",
+      "name": "Algorithm Lab",
+      "semester": 4,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "045121ab-5ec0-4b1c-b30f-9b19c1c52180"
+    },
+    {
+      "code": "CSE2403",
+      "name": "Microprocessors & Microcontrollers",
+      "semester": 4,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "c3763f69-6ec5-47a1-a63b-cd602f28ab9e"
+    },
+    {
+      "code": "CSE2404L",
+      "name": "Microcontrollers & Assembly Lab",
+      "semester": 4,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "6bbcd20b-c458-4d40-abed-2685b2a67a22"
+    },
+    {
+      "code": "CSE2405L",
+      "name": "Java Programming Lab",
+      "semester": 4,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "905ca75d-e7af-472d-be06-bdfc35d20945"
+    },
+    {
+      "code": "MAT2406",
+      "name": "Numerical Methods",
+      "semester": 4,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "9a4ad621-869f-4dd3-bc04-ae124bc4bd98"
+    },
+    {
+      "code": "MAT2407",
+      "name": "Math-IV (Matrix & Complex Analysis)",
+      "semester": 4,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "394bd100-2ca3-47ed-b4ea-9803456923ec"
+    },
+    {
+      "code": "BBA2408",
+      "name": "Introduction to Management & Marketing",
+      "semester": 4,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "b87df696-26a2-44a1-9c7d-b98746cff39c"
+    },
+    {
+      "code": "CSE3501",
+      "name": "Database Management Systems",
+      "semester": 5,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "be9e9dfb-e4ce-499a-a05a-f0a2257aad2c"
+    },
+    {
+      "code": "CSE3502L",
+      "name": "DBMS Lab",
+      "semester": 5,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "a1027b57-ebfa-4559-82e3-5d41d2a308e7"
+    },
+    {
+      "code": "CSE3503",
+      "name": "Computer Graphics & Animation",
+      "semester": 5,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "026c9a37-65b1-4610-b667-dd96c2bf0dee"
+    },
+    {
+      "code": "CSE3504L",
+      "name": "CG & Animation Lab",
+      "semester": 5,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "af669532-c1af-4440-a520-38a99ecc9f8b"
+    },
+    {
+      "code": "CSE3505",
+      "name": "Communication Engineering",
+      "semester": 5,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "61699470-9978-4608-8638-e55585c81d2c"
+    },
+    {
+      "code": "CSE3506",
+      "name": "Technical Writing & Presentation",
+      "semester": 5,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "3455f6e5-d67b-402c-b8cf-8fe976c7c688"
+    },
+    {
+      "code": "CSE3507",
+      "name": "Computer Peripherals & Interfacing",
+      "semester": 5,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "b641872d-2ad4-4963-8353-e4e18a0f8729"
+    },
+    {
+      "code": "BBA3508",
+      "name": "Financial & Managerial Accounting",
+      "semester": 5,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "ea89cb15-2c3c-46d6-9d95-2bf375268052"
+    },
+    {
+      "code": "CSE3601",
+      "name": "Operating System",
+      "semester": 6,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "357d9d37-a204-417e-99cf-0a47f3fca4cc"
+    },
+    {
+      "code": "CSE3602L",
+      "name": "Operating System Lab",
+      "semester": 6,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "a244588d-5e02-4ab7-a00c-448c916d304b"
+    },
+    {
+      "code": "CSE3603",
+      "name": "Web Engineering",
+      "semester": 6,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "993cb215-c1f3-4cde-9fbf-5f2a9455d9d5"
+    },
+    {
+      "code": "CSE3604L",
+      "name": "Web Engineering Lab",
+      "semester": 6,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "aad60c77-9ed3-4d48-910c-d0a14aa4c8e5"
+    },
+    {
+      "code": "CSE3605",
+      "name": "Computer Architecture",
+      "semester": 6,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "46886fcf-2b98-40ad-b27f-0e3e5f2ea580"
+    },
+    {
+      "code": "CSE3606",
+      "name": "Computer Peripherals",
+      "semester": 6,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "f99a392e-553e-4ba9-a3e7-67d519a0016d"
+    },
+    {
+      "code": "CSE3607",
+      "name": "Cloud Computing",
+      "semester": 6,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "86cc83e7-5bca-4ac1-aaf4-9ffdb2d348aa"
+    },
+    {
+      "code": "CSE3608L",
+      "name": "Mobile Application Lab",
+      "semester": 6,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "9e930b8c-186f-4936-bfa8-641b6903acf4"
+    },
+    {
+      "code": "CSE4701",
+      "name": "Computer Networks & Cyber Security",
+      "semester": 7,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "440fb9e2-5313-4c49-a591-43a4cb69a6b5"
+    },
+    {
+      "code": "CSE4702L",
+      "name": "CN & Cyber Security Lab",
+      "semester": 7,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "1a16cfd8-0a24-44a1-a782-8f667ca86320"
+    },
+    {
+      "code": "CSE4703",
+      "name": "Software Engineering",
+      "semester": 7,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "ef418281-81a1-4042-bcd2-00fd4895cb40"
+    },
+    {
+      "code": "CSE4704L",
+      "name": "Software Engineering Lab",
+      "semester": 7,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "4b9e8e46-5fc5-4a67-8540-2b13275769fd"
+    },
+    {
+      "code": "CSE4705",
+      "name": "Digital Signal & System",
+      "semester": 7,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "4d7c904a-38e0-463b-9b7f-a5e4616f3b2e"
+    },
+    {
+      "code": "CSE4706",
+      "name": "Simulation and Modeling",
+      "semester": 7,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "c2c814d3-92c4-426b-a661-246d9fb8fa01"
+    },
+    {
+      "code": "CSE4707",
+      "name": "Computer Graphics & Animation",
+      "semester": 7,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "4036de6e-8555-4d80-9a79-1570ae4a193a"
+    },
+    {
+      "code": "CSE4708L",
+      "name": "CG & Animation Lab",
+      "semester": 7,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "65c55688-f383-42fa-807e-e67ef7595625"
+    },
+    {
+      "code": "CSE4801",
+      "name": "Artificial Intelligence & Expert Systems",
+      "semester": 8,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "82c5269c-f210-4f2f-a3da-5b8f4ee074c9"
+    },
+    {
+      "code": "CSE4802L",
+      "name": "AI & Expert System Lab",
+      "semester": 8,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "96d1f630-71f1-4321-aa34-d5a8077d148b"
+    },
+    {
+      "code": "CSE4803",
+      "name": "Technical Writing & Presentation",
+      "semester": 8,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "efac83ba-345a-4a5f-94e9-e7afc9fff12e"
+    },
+    {
+      "code": "CSE4804",
+      "name": "Data Warehousing & Data Mining",
+      "semester": 8,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "36c22207-db83-46c6-8d60-36359f77579f"
+    },
+    {
+      "code": "CSE4805",
+      "name": "IT Entrepreneurship",
+      "semester": 8,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "8dfe0696-9833-4740-9379-53c82df309fc"
+    },
+    {
+      "code": "CSE4806",
+      "name": "Advanced Topics in Computer Science",
+      "semester": 8,
+      "creditHours": 3,
+      "courseType": "theory",
+      "sessionsPerWeek": 3,
+      "id": "70563dc6-a7e1-4d33-9d44-203f83a4b223"
+    },
+    {
+      "code": "CSE4807L",
+      "name": "Capstone Project Lab",
+      "semester": 8,
+      "creditHours": 2,
+      "courseType": "lab",
+      "sessionsPerWeek": 2,
+      "id": "abbe076b-fa5c-4663-992d-afaf973b4700"
+    },
+    {
+      "code": "CSE4808",
+      "name": "Research Methodology & Ethics",
+      "semester": 8,
+      "creditHours": 2,
+      "courseType": "theory",
+      "sessionsPerWeek": 2,
+      "id": "eafc0684-9518-44ce-84ae-2df09cd0d8c3"
+    }
+  ],
+  "batches": [
+    {
+      "name": "BATCH-41",
+      "semester": 1,
+      "studentCount": 50,
+      "section": "A",
+      "id": "1a8c4e46-6896-484f-b9b0-2ff10a3c4a8c"
+    },
+    {
+      "name": "BATCH-40",
+      "semester": 2,
+      "studentCount": 48,
+      "section": "A",
+      "id": "b1e9f798-7338-48d6-a78d-20ab8a4852e5"
+    },
+    {
+      "name": "BATCH-39",
+      "semester": 3,
+      "studentCount": 49,
+      "section": "A",
+      "id": "7361bf88-0a44-46e3-908f-239216750444"
+    },
+    {
+      "name": "BATCH-38",
+      "semester": 4,
+      "studentCount": 51,
+      "section": "A",
+      "id": "98450163-c14f-4a34-a6e5-516cbd8444f5"
+    },
+    {
+      "name": "BATCH-37",
+      "semester": 5,
+      "studentCount": 43,
+      "section": "A",
+      "id": "1b78bf4e-39d9-4d61-826f-745fac8d7f0a"
+    },
+    {
+      "name": "BATCH-35",
+      "semester": 6,
+      "studentCount": 41,
+      "section": "A",
+      "id": "19eec972-28fe-4ac4-8378-8d45e4eb22fe"
+    },
+    {
+      "name": "BATCH-36",
+      "semester": 6,
+      "studentCount": 11,
+      "section": "A",
+      "id": "b4ad91ad-4232-445f-b821-78397cd17ad6"
+    },
+    {
+      "name": "BATCH-34",
+      "semester": 7,
+      "studentCount": 41,
+      "section": "A",
+      "id": "477389a7-8391-4d04-b7bc-6a93f0f0fa2b"
+    },
+    {
+      "name": "BATCH-33",
+      "semester": 8,
+      "studentCount": 48,
+      "section": "A",
+      "id": "5c424df7-92b5-4855-b839-09464a7baa5a"
+    }
+  ],
+  "classrooms": [
+    {
+      "name": "Main Lecture A1",
+      "roomNumber": "A-101",
+      "capacity": 80,
+      "roomType": "theory",
+      "building": "Building A",
+      "id": "f1ed4be8-5bba-42d5-a17d-e2ce72c897c9"
+    },
+    {
+      "name": "Main Lecture A2",
+      "roomNumber": "A-102",
+      "capacity": 75,
+      "roomType": "theory",
+      "building": "Building A",
+      "id": "0f8374c1-f061-43d0-aa9a-b36a4280cc98"
+    },
+    {
+      "name": "Theory Room A3",
+      "roomNumber": "A-201",
+      "capacity": 60,
+      "roomType": "theory",
+      "building": "Building A",
+      "id": "3eeec195-8d48-4b7c-a418-6ee58d18faa7"
+    },
+    {
+      "name": "Theory Room A4",
+      "roomNumber": "A-202",
+      "capacity": 55,
+      "roomType": "theory",
+      "building": "Building A",
+      "id": "ad56fe12-5f7d-406c-8894-efd5cff5b281"
+    },
+    {
+      "name": "Seminar Room A5",
+      "roomNumber": "A-301",
+      "capacity": 40,
+      "roomType": "theory",
+      "building": "Building A",
+      "id": "a4b56fdc-2176-4f0e-9a92-00dc1b04e6b6"
+    },
+    {
+      "name": "Main Lecture B1",
+      "roomNumber": "B-101",
+      "capacity": 85,
+      "roomType": "theory",
+      "building": "Building B",
+      "id": "b7f2dab5-f2d9-488e-b720-69a32bc2b114"
+    },
+    {
+      "name": "Theory Room B2",
+      "roomNumber": "B-102",
+      "capacity": 65,
+      "roomType": "theory",
+      "building": "Building B",
+      "id": "53cba316-7c04-4527-bf24-c44a376f560d"
+    },
+    {
+      "name": "Theory Room B3",
+      "roomNumber": "B-201",
+      "capacity": 50,
+      "roomType": "theory",
+      "building": "Building B",
+      "id": "9f5ddfb7-e7b2-4f66-b473-1b9ae664ce0e"
+    },
+    {
+      "name": "Seminar Room B4",
+      "roomNumber": "B-301",
+      "capacity": 35,
+      "roomType": "theory",
+      "building": "Building B",
+      "id": "58c35b4a-a048-41f2-9e66-4864204ce3c1"
+    },
+    {
+      "name": "Theory Room C1",
+      "roomNumber": "C-101",
+      "capacity": 45,
+      "roomType": "theory",
+      "building": "Building C",
+      "id": "834b61ec-4331-431e-9392-e061d0303ff4"
+    },
+    {
+      "name": "CSE Lab 1",
+      "roomNumber": "C-L01",
+      "capacity": 30,
+      "roomType": "lab",
+      "building": "Building C",
+      "id": "b03e0179-5a8d-43f3-8573-a09b0565660b"
+    },
+    {
+      "name": "CSE Lab 2",
+      "roomNumber": "C-L02",
+      "capacity": 30,
+      "roomType": "lab",
+      "building": "Building C",
+      "id": "52489ceb-f2ad-452e-a304-ec724a9297a3"
+    },
+    {
+      "name": "CSE Lab 3",
+      "roomNumber": "C-L03",
+      "capacity": 25,
+      "roomType": "lab",
+      "building": "Building C",
+      "id": "a36da88e-9835-4d55-86ed-bf9872a7846d"
+    },
+    {
+      "name": "CSE Lab 4",
+      "roomNumber": "C-L04",
+      "capacity": 25,
+      "roomType": "lab",
+      "building": "Building C",
+      "id": "d1b7a507-ac30-4d07-b1f1-f0f8c8d06f93"
+    },
+    {
+      "name": "ENG Lab 1",
+      "roomNumber": "D-L01",
+      "capacity": 28,
+      "roomType": "lab",
+      "building": "Building D",
+      "id": "f6129b99-8c68-464e-b440-caee3977ea24"
+    },
+    {
+      "name": "ENG Lab 2",
+      "roomNumber": "D-L02",
+      "capacity": 28,
+      "roomType": "lab",
+      "building": "Building D",
+      "id": "6bc50675-9ce3-4a3a-ba56-55ec6d43759c"
+    },
+    {
+      "name": "Electronics Lab",
+      "roomNumber": "D-L03",
+      "capacity": 20,
+      "roomType": "lab",
+      "building": "Building D",
+      "id": "f667412b-965d-446a-a708-8eca388c826a"
+    },
+    {
+      "name": "EEE Lab",
+      "roomNumber": "D-L04",
+      "capacity": 22,
+      "roomType": "lab",
+      "building": "Building D",
+      "id": "c604fbf8-b6b9-47ba-aeb2-3b70ea5a3299"
+    },
+    {
+      "name": "CAD Lab",
+      "roomNumber": "E-L01",
+      "capacity": 15,
+      "roomType": "lab",
+      "building": "Building E",
+      "id": "94c24270-4e86-4ace-b6aa-882aca693d3b"
+    },
+    {
+      "name": "Graphics Lab",
+      "roomNumber": "E-L02",
+      "capacity": 18,
+      "roomType": "lab",
+      "building": "Building E",
+      "id": "80fb738a-aae5-449b-a575-58ee0841c93b"
+    }
+  ],
+  "timeSlots": [
+    {
+      "id": "slot-1",
+      "startTime": "08:45",
+      "endTime": "09:30",
+      "slotNumber": 1
+    },
+    {
+      "id": "slot-2",
+      "startTime": "09:30",
+      "endTime": "10:15",
+      "slotNumber": 2
+    },
+    {
+      "id": "slot-3",
+      "startTime": "10:15",
+      "endTime": "11:00",
+      "slotNumber": 3
+    },
+    {
+      "id": "slot-4",
+      "startTime": "11:00",
+      "endTime": "11:45",
+      "slotNumber": 4
+    },
+    {
+      "id": "slot-5",
+      "startTime": "11:45",
+      "endTime": "12:30",
+      "slotNumber": 5
+    },
+    {
+      "id": "slot-6",
+      "startTime": "12:30",
+      "endTime": "13:15",
+      "slotNumber": 6
+    },
+    {
+      "id": "slot-7",
+      "startTime": "13:15",
+      "endTime": "14:00",
+      "slotNumber": 7
+    },
+    {
+      "id": "slot-8",
+      "startTime": "14:00",
+      "endTime": "14:45",
+      "slotNumber": 8
+    },
+    {
+      "id": "slot-9",
+      "startTime": "14:45",
+      "endTime": "15:30",
+      "slotNumber": 9
+    }
+  ],
+  "scheduleEntries": [],
+  "lunchBreak": {
+    "startTime": "13:15",
+    "endTime": "14:00",
+    "enabled": true
+  },
+  "sessions": [
+    {
+      "id": "session-fall-2025",
+      "name": "Fall 2025"
+    },
+    {
+      "id": "session-spring-2025",
+      "name": "Spring 2025"
+    },
+    {
+      "id": "session-summer-2025",
+      "name": "Summer 2025"
+    }
+  ],
+  "currentSession": "Fall 2025"
+}
