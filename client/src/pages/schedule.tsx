@@ -50,8 +50,10 @@ export default function Schedule() {
     queryKey: ["/api/schedule"],
   });
 
-  // Filter entries by current session
-  const entries = allEntries.filter(entry => entry.session === sessionsData?.current || entry.session === "Fall 2025");
+  // Filter entries by current session (only once sessions have loaded)
+  const entries = sessionsData?.current
+    ? allEntries.filter(entry => entry.session === sessionsData.current)
+    : allEntries;
 
   const { data: lunchBreak } = useQuery<{ startTime: string; endTime: string; enabled: boolean } | undefined>({
     queryKey: ["/api/lunch-break"],
