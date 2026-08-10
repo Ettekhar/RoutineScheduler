@@ -56,12 +56,20 @@ function sendAsset(req: VercelRequest, res: VercelResponse): boolean {
   return true;
 }
 
+// Cache the Express app across requests in the same warm serverless instance.
+// This ensures storage.initialize() only runs once, so in-memory state
+// (e.g. generated schedule entries) is not lost between API calls.
+let cachedApp: ReturnType<typeof createApp> | null = null;
+
 export async function handler(req: VercelRequest, res: VercelResponse) {
   if (sendAsset(req, res)) {
     return;
   }
 
-  const app = await createApp();
+  if (!cachedApp) {
+    cachedApp = createApp();
+  }
+  const app = await cachedApp;
   return new Promise<void>((resolve) => {
     app(req as any, res as any, () => {
       if (!res.writableEnded) {
