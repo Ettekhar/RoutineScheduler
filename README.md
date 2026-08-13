@@ -2,7 +2,7 @@
 
 An automated, conflict-free weekly class routine scheduling system for universities. This system manages teacher workloads, student batches, classrooms (theory & labs), and time-slot configurations to generate schedules efficiently.
 
-👉 **[Live Deployment Link](https://routine-scheduler-be7j5wc7k-ettekhar.vercel.app/)**
+👉 **[Live Deployment Link](https://routine-scheduler-xi.vercel.app/)**
 
 ---
 
